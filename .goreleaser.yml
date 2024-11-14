@@ -26,9 +26,6 @@ archives:
       - goos: windows
         format: zip
 
-changelog:
-  sort: asc
-
 release:
   prerelease: false
   mode: replace
