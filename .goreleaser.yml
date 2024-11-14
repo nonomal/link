@@ -11,13 +11,16 @@ builds:
     main: ./cmd/link
     goos:
       - darwin
+      - freebsd
       - linux
       - windows
     goarch:
       - amd64
       - arm64
+    flags:
+      - -trimpath
     ldflags:
-      - "-s -w"
+      - -s -w
 
 archives:
   - format: tar.gz
