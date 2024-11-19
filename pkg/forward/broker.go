@@ -1,4 +1,4 @@
-package mode
+package forward
 
 import (
     "net"
