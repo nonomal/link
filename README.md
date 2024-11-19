@@ -1,7 +1,7 @@
 # **Passport**
-## *Access Pass Required to Pass Through Port*
+## *"Access Pass Required to Pass Through Port”*
 
-![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml) ![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/yosebyte/passport/total) ![GitHub License](https://img.shields.io/github/license/yosebyte/passport) ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
+![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml) ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
 
 **Passport** is a powerful connection management tool that simplifies network tunneling, port forwarding and more. By seamlessly integrating three distinct running modes within a single binary file, Passport bridges the gap between different network environments, redirecting services and handling connections seamlessly, ensuring reliable network connectivity and ideal network environment. Also with highly integrated authorization handling, Passport empowers you to efficiently manage user permissions and establish uninterrupted data flow, ensuring that sensitive resources remain protected while applications maintain high performance and responsiveness.
 
