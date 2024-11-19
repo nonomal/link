@@ -6,7 +6,7 @@ import (
     "strings"
     "sync"
 
-    "github.com/yosebyte/link/pkg/handle"
+    "github.com/yosebyte/link/pkg/util"
 )
 
 func Broker(parsedURL *url.URL, whiteList *sync.Map) error {
@@ -50,7 +50,7 @@ func Broker(parsedURL *url.URL, whiteList *sync.Map) error {
                 return
             }
             targetConn.SetNoDelay(true)
-            handle.Conn(linkConn, targetConn)
+            util.Conn(linkConn, targetConn)
         }(linkConn)
     }
 }

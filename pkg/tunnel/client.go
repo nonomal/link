@@ -5,7 +5,7 @@ import (
     "net/url"
     "strings"
 
-    "github.com/yosebyte/link/pkg/handle"
+    "github.com/yosebyte/link/pkg/util"
 )
 
 func Client(parsedURL *url.URL) error {
@@ -28,6 +28,6 @@ func Client(parsedURL *url.URL) error {
         return err
     }
     targetConn.SetNoDelay(true)
-    handle.Conn(linkConn, targetConn)
+    util.Conn(linkConn, targetConn)
     return nil
 }

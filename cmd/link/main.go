@@ -8,8 +8,9 @@ import (
     "sync"
     "time"
 
-    "github.com/yosebyte/link/pkg/handle"
-    "github.com/yosebyte/link/pkg/mode"
+    "github.com/yosebyte/link/pkg/forward"
+    "github.com/yosebyte/link/pkg/tunnel"
+    "github.com/yosebyte/link/pkg/util"
 )
 
 func main() {
@@ -30,7 +31,7 @@ func main() {
         log.Printf("[INFO] Auth: %v", parsedAuthURL)
         go func() {
             for {
-                if err := handle.Auth(parsedAuthURL, &whiteList); err != nil {
+                if err := util.Auth(parsedAuthURL, &whiteList); err != nil {
                     log.Printf("[ERRO] Auth: %v", err)
                     time.Sleep(1 * time.Second)
                     continue
@@ -42,21 +43,21 @@ func main() {
         switch parsedURL.Scheme {
         case "server":
             log.Printf("[INFO] Server: %v", strings.Split(rawURL, "#")[0])
-            if err := mode.Server(parsedURL, &whiteList); err != nil {
+            if err := tunnel.Server(parsedURL, &whiteList); err != nil {
                 log.Printf("[ERRO] Server: %v", err)
                 time.Sleep(1 * time.Second)
                 continue
             }
         case "client":
             log.Printf("[INFO] Client: %v", strings.Split(rawURL, "#")[0])
-            if err := mode.Client(parsedURL); err != nil {
+            if err := tunnel.Client(parsedURL); err != nil {
                 log.Printf("[ERRO] Client: %v", err)
                 time.Sleep(1 * time.Second)
                 continue
             }
         case "broker":
             log.Printf("[INFO] Broker: %v", strings.Split(rawURL, "#")[0])
-            if err := mode.Broker(parsedURL, &whiteList); err != nil {
+            if err := forward.Broker(parsedURL, &whiteList); err != nil {
                 log.Printf("[ERRO] Broker: %v", err)
                 time.Sleep(1 * time.Second)
                 continue

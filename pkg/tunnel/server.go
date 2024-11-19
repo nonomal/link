@@ -7,7 +7,7 @@ import (
     "sync"
     "time"
 
-    "github.com/yosebyte/link/pkg/handle"
+    "github.com/yosebyte/link/pkg/util"
 )
 
 func Server(parsedURL *url.URL, whiteList *sync.Map) error {
@@ -67,6 +67,6 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
         targetConn.Close()
         return nil
     }
-    handle.Conn(linkConn, targetConn)
+    util.Conn(linkConn, targetConn)
     return nil
 }
