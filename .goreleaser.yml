@@ -2,13 +2,13 @@ version: 2
 
 before:
   hooks:
-    - go mod init link
+    - go mod init passport
     - go mod tidy
 
 builds:
   - env:
       - CGO_ENABLED=0
-    main: ./cmd/link
+    main: ./cmd/passport
     goos:
       - darwin
       - freebsd
@@ -24,7 +24,7 @@ builds:
 
 archives:
   - format: tar.gz
-    name_template: "link_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+    name_template: "passport_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
         format: zip

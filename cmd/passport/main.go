@@ -8,14 +8,14 @@ import (
     "sync"
     "time"
 
-    "github.com/yosebyte/passport/pkg/forward"
-    "github.com/yosebyte/passport/pkg/tunnel"
-    "github.com/yosebyte/passport/pkg/util"
+    "github.com/yosebyte/link/pkg/forward"
+    "github.com/yosebyte/link/pkg/tunnel"
+    "github.com/yosebyte/link/pkg/util"
 )
 
 func main() {
     if len(os.Args) < 2 {
-        log.Fatalf("[ERRO] Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
+        log.Fatalf("[ERRO] Usage: server/client/broker://linkAddr/targetAddr#http/https://authAddr/secretPath")
     }
     rawURL := os.Args[1]
     parsedURL, err := url.Parse(rawURL)
@@ -63,7 +63,7 @@ func main() {
                 continue
             }
         default:
-            log.Fatalf("[ERRO] Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
+            log.Fatalf("[ERRO] Usage: server/client/broker://linkAddr/targetAddr#http/https://authAddr/secretPath")
         }
     }
 }

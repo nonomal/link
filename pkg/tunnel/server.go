@@ -7,7 +7,7 @@ import (
     "sync"
     "time"
 
-    "github.com/yosebyte/link/pkg/util"
+    "github.com/yosebyte/passport/pkg/util"
 )
 
 func Server(parsedURL *url.URL, whiteList *sync.Map) error {

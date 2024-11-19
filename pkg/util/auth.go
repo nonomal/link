@@ -6,7 +6,7 @@ import (
     "net/url"
     "sync"
 
-    "github.com/yosebyte/link/pkg/autotls"
+    "github.com/yosebyte/passport/pkg/autotls"
 )
 
 func Auth(parsedURL *url.URL, whiteList *sync.Map) error {
