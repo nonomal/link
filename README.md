@@ -2,7 +2,7 @@
 ![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport) ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml) ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
 
 <div align="center">
-  <img src="https://img.imgdd.com/f210f3.416bc777-a022-4c94-b050-5ff97f1df7c4.png" alt="passport">
+  <img src="https://dev.185610.xyz/webd/img/passport.png" alt="passport">
 </div>
 
 <p align="center">"Access pass is required to pass through the port.”</p>
