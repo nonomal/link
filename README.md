@@ -10,7 +10,7 @@
   <img src="https://dev.185610.xyz/webd/img/passport.png" alt="passport">
 </div>
 
-<h4 align="center">"Access pass required to pass through port.”</h4>
+<h4 align="center">"Access pass required to pass through port."</h4>
 
 ## Overview
 
