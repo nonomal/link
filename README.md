@@ -1,7 +1,7 @@
 # **Passport**
 ![Static Badge](https://img.shields.io/badge/Yosebyte-Passport-green)
 ![GitHub License](https://img.shields.io/github/license/yosebyte/passport)
-![Go Report Card](https://goreportcard.com/badge/github.com/yosebyte/passport)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yosebyte/passport)](https://goreportcard.com/report/github.com/yosebyte/passport)
 ![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
