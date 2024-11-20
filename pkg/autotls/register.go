@@ -15,19 +15,19 @@
 package autotls
 
 import (
-    "crypto/tls"
+	"crypto/tls"
 
-    "github.com/caddyserver/certmagic"
+	"github.com/caddyserver/certmagic"
 )
 
 func Register(username, hostname string) (*tls.Config, error) {
-    certmagic.DefaultACME.CA = certmagic.LetsEncryptProductionCA
-    certmagic.DefaultACME.Agreed = true
-    mailAddr := username + "@" + hostname
-    if username == "" {
-        mailAddr = "no-reply@" + hostname
-    }
-    certmagic.DefaultACME.Email = mailAddr
-    tlsConfig, err := certmagic.TLS([]string{hostname})
-    return tlsConfig, err
+	certmagic.DefaultACME.CA = certmagic.LetsEncryptProductionCA
+	certmagic.DefaultACME.Agreed = true
+	mailAddr := username + "@" + hostname
+	if username == "" {
+		mailAddr = "no-reply@" + hostname
+	}
+	certmagic.DefaultACME.Email = mailAddr
+	tlsConfig, err := certmagic.TLS([]string{hostname})
+	return tlsConfig, err
 }
