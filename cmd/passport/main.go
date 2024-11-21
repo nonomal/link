@@ -62,6 +62,13 @@ func main() {
 				time.Sleep(1 * time.Second)
 				continue
 			}
+		case "shadow":
+			log.Printf("[INFO] Shadow: %v", strings.Split(rawURL, "#")[0])
+			if err := forward.Shadow(parsedURL, &whiteList); err != nil {
+				log.Printf("[ERRO] Shadow: %v", err)
+				time.Sleep(1 * time.Second)
+				continue
+			}
 		default:
 			log.Fatalf("[ERRO] Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
 		}
