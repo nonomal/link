@@ -26,3 +26,6 @@ archives:
     format_overrides:
       - goos: windows
         format: zip
+release:
+  prerelease: false
+  mode: replace
