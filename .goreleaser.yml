@@ -2,7 +2,6 @@ version: 2
 
 before:
   hooks:
-    - go mod init passport
     - go mod tidy
 
 builds:
