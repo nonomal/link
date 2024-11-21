@@ -23,7 +23,6 @@ builds:
 
 archives:
   - format: tar.gz
-    name_template: "passport_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
     format_overrides:
       - goos: windows
         format: zip
