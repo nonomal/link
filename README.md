@@ -5,7 +5,9 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/yosebyte/passport)](https://goreportcard.com/report/github.com/yosebyte/passport)
 ![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/yosebyte/passport/total)
 ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/yosebyte/passport/latest)
 
 <div align="center">
   <img src="https://dev.185610.xyz/webd/img/passport.png" alt="passport">
