@@ -5,8 +5,6 @@ import (
 	"net/http"
 	"net/url"
 	"sync"
-
-	"github.com/yosebyte/passport/pkg/autotls"
 )
 
 func Auth(parsedURL *url.URL, whiteList *sync.Map) error {
@@ -25,7 +23,7 @@ func Auth(parsedURL *url.URL, whiteList *sync.Map) error {
 			return err
 		}
 	} else {
-		tlsConfig, err := autotls.Setup(parsedURL.User.Username(), parsedURL.Hostname())
+		tlsConfig, err := TLS(parsedURL.Hostname())
 		if err != nil {
 			return err
 		}

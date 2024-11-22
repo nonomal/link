@@ -1,4 +1,4 @@
-package autotls
+package util
 
 import (
 	"crypto/rand"
@@ -11,7 +11,7 @@ import (
 	"time"
 )
 
-func Generate(hostname string) (*tls.Config, error) {
+func TLS(hostname string) (*tls.Config, error) {
 	private, err := rsa.GenerateKey(rand.Reader, 2048)
 	if err != nil {
 		return nil, err
