@@ -24,8 +24,6 @@
 
 - **Authorization Handling**: By IP address handling, Passport ensures only authorized users gain access to sensitive resources.
 
-- **Automated Certificate**: Uses Certmagic for seamless, automatic certificate issuance and renewal with domain available.
-
 - **In-Memory Certificate**: Provides a self-signed HTTPS certificate with a one-year validity, stored entirely in memory.
 
 - **Auto Reconnection**: Providing robust short-term reconnection capabilities, ensuring uninterrupted service.
@@ -33,6 +31,8 @@
 - **Connection Updates**: In scenarios where connection is interrupted, Passport supports real-time connection updates.
 
 - **Service Forwarding**: Efficiently manage and redirect your connections from one service to entrypoints everywhere.
+
+- **Zero Dependencies**: Fully self-contained, with no external dependencies, ensuring a simple and efficient setup.
 
 ## Usage
 
