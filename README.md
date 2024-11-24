@@ -8,7 +8,7 @@
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/yosebyte/passport/latest)
 
 <div align="center">
-  <img src="https://dev.185610.xyz/webd/img/passport.png" alt="passport">
+  <img src="https://cdn.185610.xyz/assets/passport.png" alt="passport">
 </div>
 
 <h4 align="center">"Access pass required to pass through port."</h4>
