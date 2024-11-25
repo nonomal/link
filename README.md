@@ -27,9 +27,11 @@
 
 - **Connection Updates**: In scenarios where connection is interrupted, Passport supports real-time connection updates.
 
-- **Service Forwarding**: Efficiently manage and redirect your connections from one service to entrypoints everywhere.
+- **Port Forwarding**: Efficiently manage and redirect your TCP and/or UDP services from one port to entrypoints everywhere.
 
 - **Zero Dependencies**: Fully self-contained, with no external dependencies, ensuring a simple and efficient setup.
+
+- **Zero Configuration File**: Simply execute with a single URL command, making it ideal for containerized environments.
 
 ## Usage
 
@@ -98,7 +100,7 @@ broker://linkAddr/targetAddr#authScheme://authAddr/secretPath
 ./passport broker://:10101/127.0.0.1:22
 ```
 
-- This command will listen for client connections on port `10101` , connect and forward data to `127.0.0.1:22`.
+- This command will listen both `tcp` and `udp` on port `10101` , connect and forward data to `127.0.0.1:22`.
 
 **Run as Broker with authorization**
 
@@ -107,7 +109,7 @@ broker://linkAddr/targetAddr#authScheme://authAddr/secretPath
 ```
 
 - The server handles authorization at `https://hostname:8443/broker`, on your visit and your IP logged.
-- The server will listen for client connections on port `10101` , connect and forward data to `127.0.0.1:22`.
+- This command will listen both `tcp` and `udp` on port `10101` , connect and forward data to `127.0.0.1:22`.
 
 ## Container Usage
 
