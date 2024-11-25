@@ -1,5 +1,7 @@
 ![GitHub License](https://img.shields.io/github/license/yosebyte/passport)
 [![Go Report Card](https://goreportcard.com/badge/github.com/yosebyte/passport)](https://goreportcard.com/report/github.com/yosebyte/passport)
+[![Go Reference](https://pkg.go.dev/badge/github.com/yosebyte/passport.svg)](https://pkg.go.dev/github.com/yosebyte/passport)
+[![Coverage Status](https://coveralls.io/repos/github/yosebyte/passport/badge.svg?branch=main)](https://coveralls.io/github/yosebyte/passport?branch=main)
 ![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
