@@ -4,13 +4,7 @@ import (
 	"log"
 	"net/url"
 	"os"
-	"strings"
 	"sync"
-	"time"
-
-	"github.com/yosebyte/passport/internal/forward"
-	"github.com/yosebyte/passport/internal/tunnel"
-	"github.com/yosebyte/passport/internal/util"
 )
 
 func main() {
@@ -23,54 +17,6 @@ func main() {
 		log.Fatalf("[ERRO] URL: %v", err)
 	}
 	var whiteList sync.Map
-	if parsedURL.Fragment != "" {
-		parsedAuthURL, err := url.Parse(parsedURL.Fragment)
-		if err != nil {
-			log.Fatalf("[ERRO] URL: %v", err)
-		}
-		log.Printf("[INFO] Auth: %v", parsedAuthURL)
-		go func() {
-			for {
-				if err := util.Auth(parsedAuthURL, &whiteList); err != nil {
-					log.Printf("[ERRO] Auth: %v", err)
-					time.Sleep(1 * time.Second)
-					continue
-				}
-			}
-		}()
-	}
-	for {
-		switch parsedURL.Scheme {
-		case "server":
-			log.Printf("[INFO] Server: %v", strings.Split(rawURL, "#")[0])
-			if err := tunnel.Server(parsedURL, &whiteList); err != nil {
-				log.Printf("[ERRO] Server: %v", err)
-				time.Sleep(1 * time.Second)
-				continue
-			}
-		case "client":
-			log.Printf("[INFO] Client: %v", strings.Split(rawURL, "#")[0])
-			if err := tunnel.Client(parsedURL); err != nil {
-				log.Printf("[ERRO] Client: %v", err)
-				time.Sleep(1 * time.Second)
-				continue
-			}
-		case "broker":
-			log.Printf("[INFO] Broker: %v", strings.Split(rawURL, "#")[0])
-			if err := forward.Broker(parsedURL, &whiteList); err != nil {
-				log.Printf("[ERRO] Broker: %v", err)
-				time.Sleep(1 * time.Second)
-				continue
-			}
-		case "shadow":
-			log.Printf("[INFO] Shadow: %v", strings.Split(rawURL, "#")[0])
-			if err := forward.Shadow(parsedURL, &whiteList); err != nil {
-				log.Printf("[ERRO] Shadow: %v", err)
-				time.Sleep(1 * time.Second)
-				continue
-			}
-		default:
-			log.Fatalf("[ERRO] Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
-		}
-	}
+	authSetup(parsedURL, &whiteList)
+	coreSelect(parsedURL, rawURL, &whiteList)
 }
