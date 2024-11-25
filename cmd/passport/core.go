@@ -20,8 +20,6 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 			runClient(parsedURL, rawURL)
 		case "broker":
 			runBroker(parsedURL, rawURL, whiteList)
-		case "shadow":
-			runShadow(parsedURL, rawURL, whiteList)
 		default:
 			log.Fatalf("[ERRO] Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
 		}
@@ -48,14 +46,6 @@ func runBroker(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 	log.Printf("[INFO] Broker: %v", strings.Split(rawURL, "#")[0])
 	if err := forward.Broker(parsedURL, whiteList); err != nil {
 		log.Printf("[ERRO] Broker: %v", err)
-		time.Sleep(1 * time.Second)
-	}
-}
-
-func runShadow(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Printf("[INFO] Shadow: %v", strings.Split(rawURL, "#")[0])
-	if err := forward.Shadow(parsedURL, whiteList); err != nil {
-		log.Printf("[ERRO] Shadow: %v", err)
 		time.Sleep(1 * time.Second)
 	}
 }

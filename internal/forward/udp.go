@@ -7,7 +7,7 @@ import (
 	"sync"
 )
 
-func Shadow(parsedURL *url.URL, whiteList *sync.Map) error {
+func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 	linkAddr, err := net.ResolveUDPAddr("udp", parsedURL.Host)
 	if err != nil {
 		return err
