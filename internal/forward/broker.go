@@ -6,7 +6,7 @@ import (
 	"strings"
 	"sync"
 
-	"github.com/yosebyte/passport/pkg/util"
+	"github.com/yosebyte/passport/internal/util"
 )
 
 func Broker(parsedURL *url.URL, whiteList *sync.Map) error {

@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"github.com/yosebyte/passport/pkg/util"
+	"github.com/yosebyte/passport/internal/util"
 )
 
 func Client(parsedURL *url.URL) error {

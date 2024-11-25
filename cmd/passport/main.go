@@ -8,9 +8,9 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yosebyte/passport/pkg/forward"
-	"github.com/yosebyte/passport/pkg/tunnel"
-	"github.com/yosebyte/passport/pkg/util"
+	"github.com/yosebyte/passport/internal/forward"
+	"github.com/yosebyte/passport/internal/tunnel"
+	"github.com/yosebyte/passport/internal/util"
 )
 
 func main() {
