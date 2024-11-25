@@ -25,6 +25,3 @@ jobs:
           args: release --clean
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - 
-        name: Coveralls GitHub Action
-        uses: coverallsapp/github-action@v2.3.4
