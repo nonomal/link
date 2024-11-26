@@ -23,5 +23,5 @@ archives:
       - goos: windows
         format: zip
 release:
-  prerelease: false
+  prerelease: true
   mode: replace
