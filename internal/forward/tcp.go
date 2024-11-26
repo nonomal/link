@@ -7,19 +7,23 @@ import (
 	"sync"
 
 	"github.com/yosebyte/passport/internal/util"
+	"github.com/yosebyte/passport/pkg/log"
 )
 
 func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 	linkAddr, err := net.ResolveTCPAddr("tcp", parsedURL.Host)
 	if err != nil {
+		log.Error("Unable to resolve link address: %v", parsedURL.Host)
 		return err
 	}
 	targetAddr, err := net.ResolveTCPAddr("tcp", strings.TrimPrefix(parsedURL.Path, "/"))
 	if err != nil {
+		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
 		return err
 	}
 	linkListen, err := net.ListenTCP("tcp", linkAddr)
 	if err != nil {
+		log.Error("Unable to listen link address: %v", linkAddr)
 		return err
 	}
 	defer linkListen.Close()
@@ -27,6 +31,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
+			log.Error("Unable to accept connections form link address: %v", linkAddr)
 			continue
 		}
 		linkConn.SetNoDelay(true)
@@ -36,21 +41,25 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			if parsedURL.Fragment != "" {
 				clientIP, _, err := net.SplitHostPort(linkConn.RemoteAddr().String())
 				if err != nil {
+					log.Error("Unable to extract client IP address: %v", linkConn.RemoteAddr().String())
 					linkConn.Close()
 					return
 				}
 				if _, exists := whiteList.Load(clientIP); !exists {
+					log.Warn("Unauthorized access blocked: %v not found in whiteList", clientIP)
 					linkConn.Close()
 					return
 				}
 			}
 			targetConn, err := net.DialTCP("tcp", nil, targetAddr)
 			if err != nil {
+				log.Error("Unable to dial target address: %v", targetAddr)
 				linkConn.Close()
 				return
 			}
 			targetConn.SetNoDelay(true)
-			util.Conn(linkConn, targetConn)
+			log.Info("Starting data exchange: %v <-> %v", linkAddr, targetAddr)
+			util.HandleConn(linkConn, targetConn)
 		}(linkConn)
 	}
 }

@@ -19,6 +19,6 @@ func main() {
 		log.Fatal("Error parsing core URL: %v", err)
 	}
 	var whiteList sync.Map
-	authSetup(parsedURL, &whiteList)
+	authSetups(parsedURL, &whiteList)
 	coreSelect(parsedURL, rawURL, &whiteList)
 }

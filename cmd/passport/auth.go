@@ -9,7 +9,7 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func authSetup(parsedURL *url.URL, whiteList *sync.Map) {
+func authSetups(parsedURL *url.URL, whiteList *sync.Map) {
 	if parsedURL.Fragment == "" {
 		log.Info("Authorization disabled")
 		return
@@ -21,7 +21,7 @@ func authSetup(parsedURL *url.URL, whiteList *sync.Map) {
 	log.Info("Authorization enabled: %v", parsedAuthURL)
 	go func() {
 		for {
-			if err := util.Auth(parsedAuthURL, whiteList); err != nil {
+			if err := util.HandleHTTP(parsedAuthURL, whiteList); err != nil {
 				log.Error("Authorization error: %v Restarting in 1s...", err)
 				time.Sleep(1 * time.Second)
 				continue
