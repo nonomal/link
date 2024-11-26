@@ -66,7 +66,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 			return err
 		}
 		if _, exists := whiteList.Load(clientIP); !exists && linkConn != nil {
-			log.Warn("Unauthorized access blocked: %v not found in whiteList", clientIP)
+			log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
 			targetConn.Close()
 			linkConn.Close()
 			return nil
@@ -76,7 +76,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		targetConn.Close()
 		return nil
 	}
-	log.Info("Starting data exchange: %v <-> %v", linkAddr, targetAddr)
+	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
 	util.HandleConn(linkConn, targetConn)
 	return nil
 }

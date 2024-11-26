@@ -10,7 +10,7 @@ import (
 
 func main() {
 	if len(os.Args) < 2 {
-		log.Info("Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
+		log.Info("Usage: server|client|broker://link/target#http|https://auth/path")
 		os.Exit(1)
 	}
 	rawURL := os.Args[1]

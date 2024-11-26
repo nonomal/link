@@ -46,7 +46,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 					return
 				}
 				if _, exists := whiteList.Load(clientIP); !exists {
-					log.Warn("Unauthorized access blocked: %v not found in whiteList", clientIP)
+					log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
 					linkConn.Close()
 					return
 				}
@@ -58,7 +58,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 				return
 			}
 			targetConn.SetNoDelay(true)
-			log.Info("Starting data exchange: %v <-> %v", linkAddr, targetAddr)
+			log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
 			util.HandleConn(linkConn, targetConn)
 		}(linkConn)
 	}

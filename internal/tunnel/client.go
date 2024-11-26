@@ -33,7 +33,7 @@ func Client(parsedURL *url.URL) error {
 		return err
 	}
 	targetConn.SetNoDelay(true)
-	log.Info("Starting data exchange: %v <-> %v", linkAddr, targetAddr)
+	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
 	util.HandleConn(linkConn, targetConn)
 	log.Info("Connection closed successfully")
 	return nil

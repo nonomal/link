@@ -36,7 +36,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		if parsedURL.Fragment != "" {
 			clientIP := remoteAddr.IP.String()
 			if _, exists := whiteList.Load(clientIP); !exists {
-				log.Warn("Unauthorized access blocked: %v not found in whiteList", clientIP)
+				log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
 				continue
 			}
 		}
@@ -56,7 +56,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 			writeBuffer := make([]byte, 4096)
 			n, _, err := targetConn.ReadFromUDP(writeBuffer)
 			if err == nil {
-				log.Info("Starting data transfer: %v <-> %v", linkAddr, targetAddr)
+				log.Info("Starting data transfer: [%v] <-> [%v]", linkAddr, targetAddr)
 				linkConn.WriteToUDP(writeBuffer[:n], addr)
 			}
 		}(readBuffer[:n], remoteAddr)

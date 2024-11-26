@@ -22,7 +22,7 @@ func HandleHTTP(parsedURL *url.URL, whiteList *sync.Map) error {
 			return
 		}
 		whiteList.Store(clientIP, struct{}{})
-		log.Info("Authorized IP address: %v added to whiteList", clientIP)
+		log.Info("Authorized IP address added: [%v]", clientIP)
 	})
 	if parsedURL.Scheme == "http" {
 		if err := http.ListenAndServe(parsedURL.Host, nil); err != nil {
