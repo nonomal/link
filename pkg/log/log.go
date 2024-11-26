@@ -35,7 +35,7 @@ func log(level, format string, v ...interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
 	color := colors[level]
 	message := fmt.Sprintf(format, v...)
-	fmt.Printf("%s  %s%s%s  %s\n", timestamp, color, level, ColorReset, message)
+	fmt.Printf("%v  %v%v%v  %v\n", timestamp, color, level, ColorReset, message)
 	if level == LevelFatal {
 		os.Exit(1)
 	}
