@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"net/url"
 	"strings"
 	"sync"
@@ -9,6 +8,7 @@ import (
 
 	"github.com/yosebyte/passport/internal/forward"
 	"github.com/yosebyte/passport/internal/tunnel"
+	"github.com/yosebyte/passport/pkg/log"
 )
 
 func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
@@ -21,31 +21,31 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 		case "broker":
 			runBroker(parsedURL, rawURL, whiteList)
 		default:
-			log.Fatalf("[ERRO] Usage: server|client|broker://linkAddr/targetAddr#http|https://authAddr/secretPath")
+			log.Fatal("Invalid running core: use server, client, broker.")
 		}
 	}
 }
 
 func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Printf("[INFO] Server: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Server core enabled: %v", strings.Split(rawURL, "#")[0])
 	if err := tunnel.Server(parsedURL, whiteList); err != nil {
-		log.Printf("[ERRO] Server: %v", err)
+		log.Error("Server core error: %v Restarting in 1s...", err)
 		time.Sleep(1 * time.Second)
 	}
 }
 
 func runClient(parsedURL *url.URL, rawURL string) {
-	log.Printf("[INFO] Client: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Client core enabled: %v", strings.Split(rawURL, "#")[0])
 	if err := tunnel.Client(parsedURL); err != nil {
-		log.Printf("[ERRO] Client: %v", err)
+		log.Error("Client core error: %v Restarting in 1s...", err)
 		time.Sleep(1 * time.Second)
 	}
 }
 
 func runBroker(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Printf("[INFO] Broker: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Broker core enabled: %v", strings.Split(rawURL, "#")[0])
 	if err := forward.Broker(parsedURL, whiteList); err != nil {
-		log.Printf("[ERRO] Broker: %v", err)
+		log.Error("Broker core error: %v Restarting in 1s...", err)
 		time.Sleep(1 * time.Second)
 	}
 }
