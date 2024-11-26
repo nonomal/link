@@ -21,13 +21,13 @@ const (
 )
 
 var (
-	mu     sync.Mutex
 	colors = map[string]string{
 		LevelInfo:  ColorInfo,
 		LevelWarn:  ColorWarn,
 		LevelError: ColorError,
 		LevelFatal: ColorFatal,
 	}
+	mu sync.Mutex
 )
 
 func log(level, format string, v ...interface{}) {
@@ -36,7 +36,7 @@ func log(level, format string, v ...interface{}) {
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
 	color := colors[level]
 	message := fmt.Sprintf(format, v...)
-	fmt.Printf("%s [%s%s%s] %s\n", timestamp, color, level, ColorReset, message)
+	fmt.Printf("%s  %s%s%s  %s\n", timestamp, color, level, ColorReset, message)
 	if level == LevelFatal {
 		os.Exit(1)
 	}
