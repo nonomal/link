@@ -145,7 +145,7 @@ docker run --rm ghcr.io/yosebyte/passport broker://:10101/127.0.0.1:22
 
 ## License
 
-This project is licensed under the MIT License. See the LICENSE file for details.
+This project is licensed under the [MIT](LICENSE) License.
 
 ## Stars
 [![Stargazers over time](https://starchart.cc/yosebyte/passport.svg?variant=adaptive)](https://starchart.cc/yosebyte/passport)
