@@ -12,7 +12,6 @@ const (
 	LevelWarn  = "WARN"
 	LevelError = "ERROR"
 	LevelFatal = "FATAL"
-
 	ColorReset = "\033[0m"
 	ColorInfo  = "\033[32m"
 	ColorWarn  = "\033[33m"
