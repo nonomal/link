@@ -23,7 +23,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	linkListen, err := net.ListenTCP("tcp", linkAddr)
 	if err != nil {
-		log.Error("Unable to listen link address: %v", linkAddr)
+		log.Error("Unable to listen link address: [%v]", linkAddr)
 		return err
 	}
 	defer linkListen.Close()
@@ -31,17 +31,18 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
-			log.Error("Unable to accept connections form link address: %v", linkAddr)
+			log.Error("Unable to accept connections form link address: [%v]", linkAddr)
 			continue
 		}
 		linkConn.SetNoDelay(true)
 		tempSlot <- struct{}{}
 		go func(linkConn net.Conn) {
 			defer func() { <-tempSlot }()
+			clientAddr := linkConn.RemoteAddr().String()
 			if parsedURL.Fragment != "" {
-				clientIP, _, err := net.SplitHostPort(linkConn.RemoteAddr().String())
+				clientIP, _, err := net.SplitHostPort(clientAddr)
 				if err != nil {
-					log.Error("Unable to extract client IP address: %v", linkConn.RemoteAddr().String())
+					log.Error("Unable to extract client IP address: [%v]", clientAddr)
 					linkConn.Close()
 					return
 				}
@@ -53,12 +54,12 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			}
 			targetConn, err := net.DialTCP("tcp", nil, targetAddr)
 			if err != nil {
-				log.Error("Unable to dial target address: %v", targetAddr)
+				log.Error("Unable to dial target address: [%v]", targetAddr)
 				linkConn.Close()
 				return
 			}
 			targetConn.SetNoDelay(true)
-			log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
+			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			util.HandleConn(linkConn, targetConn)
 		}(linkConn)
 	}

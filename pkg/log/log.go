@@ -1,7 +1,9 @@
 package log
 
 import (
+	"bytes"
 	"fmt"
+	"log"
 	"os"
 	"sync"
 	"time"
@@ -29,7 +31,18 @@ var (
 	mu sync.Mutex
 )
 
-func log(level, format string, v ...interface{}) {
+type Adapter struct{}
+
+func (a *Adapter) Write(p []byte) (n int, err error) {
+	Error("%v", bytes.TrimSpace(p))
+	return len(p), nil
+}
+
+func NewLogger() *log.Logger {
+	return log.New(&Adapter{}, "", 0)
+}
+
+func logger(level, format string, v ...interface{}) {
 	mu.Lock()
 	defer mu.Unlock()
 	timestamp := time.Now().Format("2006-01-02 15:04:05.000")
@@ -42,17 +55,17 @@ func log(level, format string, v ...interface{}) {
 }
 
 func Info(format string, v ...interface{}) {
-	log(LevelInfo, format, v...)
+	logger(LevelInfo, format, v...)
 }
 
 func Warn(format string, v ...interface{}) {
-	log(LevelWarn, format, v...)
+	logger(LevelWarn, format, v...)
 }
 
 func Error(format string, v ...interface{}) {
-	log(LevelError, format, v...)
+	logger(LevelError, format, v...)
 }
 
 func Fatal(format string, v ...interface{}) {
-	log(LevelFatal, format, v...)
+	logger(LevelFatal, format, v...)
 }

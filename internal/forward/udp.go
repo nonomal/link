@@ -22,7 +22,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	linkConn, err := net.ListenUDP("udp", linkAddr)
 	if err != nil {
-		log.Error("Unable to listen link address: %v", linkAddr)
+		log.Error("Unable to listen link address: [%v]", linkAddr)
 		return err
 	}
 	defer linkConn.Close()
@@ -30,7 +30,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 	for {
 		n, remoteAddr, err := linkConn.ReadFromUDP(readBuffer)
 		if err != nil {
-			log.Error("Unable to read UDP from remote address: %v", remoteAddr)
+			log.Error("Unable to read UDP from remote address: [%v]", remoteAddr)
 			continue
 		}
 		if parsedURL.Fragment != "" {
@@ -42,22 +42,22 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		}
 		targetConn, err := net.DialUDP("udp", nil, targetAddr)
 		if err != nil {
-			log.Error("Unable to dial target address: %v", targetAddr)
+			log.Error("Unable to dial target address: [%v]", targetAddr)
 			targetConn.Close()
 			continue
 		}
-		go func(data []byte, addr *net.UDPAddr) {
+		go func(data []byte, remoteAddr *net.UDPAddr) {
 			defer targetConn.Close()
 			_, err := targetConn.Write(data)
 			if err != nil {
-				log.Error("Unable to write target data: %v", addr)
+				log.Error("Unable to write remote data: [%v]", remoteAddr)
 				return
 			}
 			writeBuffer := make([]byte, 4096)
 			n, _, err := targetConn.ReadFromUDP(writeBuffer)
 			if err == nil {
-				log.Info("Starting data transfer: [%v] <-> [%v]", linkAddr, targetAddr)
-				linkConn.WriteToUDP(writeBuffer[:n], addr)
+				log.Info("Starting data transfer: [%v] <-> [%v]", remoteAddr, targetAddr)
+				linkConn.WriteToUDP(writeBuffer[:n], remoteAddr)
 			}
 		}(readBuffer[:n], remoteAddr)
 	}

@@ -23,13 +23,13 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	linkListen, err := net.ListenTCP("tcp", linkAddr)
 	if err != nil {
-		log.Error("Unable to listen link address: %v", linkAddr)
+		log.Error("Unable to listen link address: [%v]", linkAddr)
 		return err
 	}
 	defer linkListen.Close()
 	targetListen, err := net.ListenTCP("tcp", targetAddr)
 	if err != nil {
-		log.Error("Unable to listen target address: %v", targetAddr)
+		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetListen.Close()
@@ -38,11 +38,11 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		for {
 			tempConn, err := linkListen.AcceptTCP()
 			if err != nil {
-				log.Error("Unable to accept connections form link address: %v", linkAddr)
+				log.Error("Unable to accept connections form link address: [%v]", linkAddr)
 				continue
 			}
 			if linkConn != nil {
-				log.Warn("Connection closed by target service")
+				log.Warn("Connection closed by target service: [%v]", targetAddr)
 				linkConn.Close()
 			}
 			linkConn = tempConn
@@ -52,15 +52,16 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 	}()
 	targetConn, err := targetListen.AcceptTCP()
 	if err != nil {
-		log.Error("Unable to accept connections form target address: %v", targetAddr)
+		log.Error("Unable to accept connections form target address: [%v]", targetAddr)
 		linkConn.Close()
 		return err
 	}
 	targetConn.SetNoDelay(true)
+	clientAddr := linkConn.RemoteAddr().String()
 	if parsedURL.Fragment != "" {
-		clientIP, _, err := net.SplitHostPort(targetConn.RemoteAddr().String())
+		clientIP, _, err := net.SplitHostPort(clientAddr)
 		if err != nil {
-			log.Error("Unable to extract client IP address: %v", targetConn.RemoteAddr().String())
+			log.Error("Unable to extract client IP address: [%v]", clientAddr)
 			targetConn.Close()
 			linkConn.Close()
 			return err
@@ -76,7 +77,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		targetConn.Close()
 		return nil
 	}
-	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
+	log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 	util.HandleConn(linkConn, targetConn)
 	return nil
 }
