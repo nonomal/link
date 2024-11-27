@@ -34,7 +34,7 @@ var (
 type Adapter struct{}
 
 func (a *Adapter) Write(p []byte) (n int, err error) {
-	Error("%v", bytes.TrimSpace(p))
+	Warn("%v", string(bytes.TrimSpace(p)))
 	return len(p), nil
 }
 
