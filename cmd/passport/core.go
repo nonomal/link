@@ -12,40 +12,47 @@ import (
 )
 
 func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	for {
-		switch parsedURL.Scheme {
-		case "server":
-			runServer(parsedURL, rawURL, whiteList)
-		case "client":
-			runClient(parsedURL, rawURL)
-		case "broker":
-			runBroker(parsedURL, rawURL, whiteList)
-		default:
-			log.Fatal("Invalid running core: use server|client|broker://")
-		}
+	switch parsedURL.Scheme {
+	case "server":
+		runServer(parsedURL, rawURL, whiteList)
+	case "client":
+		runClient(parsedURL, rawURL)
+	case "broker":
+		runBroker(parsedURL, rawURL, whiteList)
+	default:
+		log.Fatal("Invalid running core: use server|client|broker://")
 	}
 }
 
 func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Info("Server core enabled: %v", strings.Split(rawURL, "#")[0])
-	if err := tunnel.Server(parsedURL, whiteList); err != nil {
-		log.Error("Server core error: %v Restarting in 1s...", err)
-		time.Sleep(1 * time.Second)
+	log.Info("Server mode enabled: %v", strings.Split(rawURL, "#")[0])
+	for {
+		if err := tunnel.Server(parsedURL, whiteList); err != nil {
+			log.Error("Server core error: %v", err)
+			log.Info("Restarting in 1s...")
+			time.Sleep(1 * time.Second)
+		}
 	}
 }
 
 func runClient(parsedURL *url.URL, rawURL string) {
-	log.Info("Client core enabled: %v", strings.Split(rawURL, "#")[0])
-	if err := tunnel.Client(parsedURL); err != nil {
-		log.Error("Client core error: %v Restarting in 1s...", err)
-		time.Sleep(1 * time.Second)
+	log.Info("Client mode enabled: %v", strings.Split(rawURL, "#")[0])
+	for {
+		if err := tunnel.Client(parsedURL); err != nil {
+			log.Error("Client core error: %v", err)
+			log.Info("Restarting in 1s...")
+			time.Sleep(1 * time.Second)
+		}
 	}
 }
 
 func runBroker(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Info("Broker core enabled: %v", strings.Split(rawURL, "#")[0])
-	if err := forward.Broker(parsedURL, whiteList); err != nil {
-		log.Error("Broker core error: %v Restarting in 1s...", err)
-		time.Sleep(1 * time.Second)
+	log.Info("Broker mode enabled: %v", strings.Split(rawURL, "#")[0])
+	for {
+		if err := forward.Broker(parsedURL, whiteList); err != nil {
+			log.Error("Broker core error: %v", err)
+			log.Info("Restarting in 1s...")
+			time.Sleep(1 * time.Second)
+		}
 	}
 }

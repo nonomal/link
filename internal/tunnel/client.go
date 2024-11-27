@@ -26,6 +26,7 @@ func Client(parsedURL *url.URL) error {
 		return err
 	}
 	linkConn.SetNoDelay(true)
+	log.Info("Tunnel connection established")
 	targetConn, err := net.DialTCP("tcp", nil, targetAddr)
 	if err != nil {
 		log.Error("Unable to dial target address: [%v]", targetAddr)
@@ -33,7 +34,8 @@ func Client(parsedURL *url.URL) error {
 		return err
 	}
 	targetConn.SetNoDelay(true)
-	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
+	log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
 	util.HandleConn(linkConn, targetConn)
+	log.Info("Connection closed successfully")
 	return nil
 }

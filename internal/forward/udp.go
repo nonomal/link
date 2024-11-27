@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/yosebyte/passport/pkg/log"
 )
@@ -30,7 +31,8 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 	for {
 		n, remoteAddr, err := linkConn.ReadFromUDP(readBuffer)
 		if err != nil {
-			log.Error("Unable to read UDP from remote address: [%v]", remoteAddr)
+			log.Warn("Unable to read from link address: [%v] %v", remoteAddr, err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		if parsedURL.Fragment != "" {
@@ -46,6 +48,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 			targetConn.Close()
 			continue
 		}
+		log.Info("Target connection established")
 		go func(data []byte, remoteAddr *net.UDPAddr) {
 			defer targetConn.Close()
 			_, err := targetConn.Write(data)
@@ -59,6 +62,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 				log.Info("Starting data transfer: [%v] <-> [%v]", remoteAddr, targetAddr)
 				linkConn.WriteToUDP(writeBuffer[:n], remoteAddr)
 			}
+			log.Info("Connection closed successfully")
 		}(readBuffer[:n], remoteAddr)
 	}
 }

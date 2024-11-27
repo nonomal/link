@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/yosebyte/passport/internal/util"
 	"github.com/yosebyte/passport/pkg/log"
@@ -31,7 +32,8 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
-			log.Error("Unable to accept connections form link address: [%v]", linkAddr)
+			log.Warn("Unable to connect link address: [%v] %v", linkAddr, err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		linkConn.SetNoDelay(true)
@@ -39,6 +41,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 		go func(linkConn net.Conn) {
 			defer func() { <-tempSlot }()
 			clientAddr := linkConn.RemoteAddr().String()
+			log.Info("Client connection established from: [%v]", clientAddr)
 			if parsedURL.Fragment != "" {
 				clientIP, _, err := net.SplitHostPort(clientAddr)
 				if err != nil {
@@ -59,8 +62,9 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 				return
 			}
 			targetConn.SetNoDelay(true)
-			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
+			log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			util.HandleConn(linkConn, targetConn)
+			log.Info("Connection closed successfully")
 		}(linkConn)
 	}
 }

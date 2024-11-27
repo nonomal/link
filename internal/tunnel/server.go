@@ -47,8 +47,8 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 				linkConn.Close()
 			}
 			linkConn = tempConn
-			log.Info("Reconnection complete")
 			linkConn.SetNoDelay(true)
+			log.Info("Tunnel connection established")
 		}
 	}()
 	targetConn, err := targetListen.AcceptTCP()
@@ -59,6 +59,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	targetConn.SetNoDelay(true)
 	clientAddr := targetConn.RemoteAddr().String()
+	log.Info("Target connection established from: [%v]", clientAddr)
 	if parsedURL.Fragment != "" {
 		clientIP, _, err := net.SplitHostPort(clientAddr)
 		if err != nil {
@@ -80,5 +81,6 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 	util.HandleConn(linkConn, targetConn)
+	log.Info("Connection closed successfully")
 	return nil
 }

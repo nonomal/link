@@ -11,7 +11,6 @@ import (
 
 func authSetups(parsedURL *url.URL, whiteList *sync.Map) {
 	if parsedURL.Fragment == "" {
-		log.Info("Authorization disabled")
 		return
 	}
 	parsedAuthURL, err := url.Parse(parsedURL.Fragment)
@@ -22,7 +21,8 @@ func authSetups(parsedURL *url.URL, whiteList *sync.Map) {
 	go func() {
 		for {
 			if err := util.HandleHTTP(parsedAuthURL, whiteList); err != nil {
-				log.Error("Authorization error: %v Restarting in 1s...", err)
+				log.Error("Authorization error: %v", err)
+				log.Info("Restarting in 1s...")
 				time.Sleep(1 * time.Second)
 				continue
 			}
