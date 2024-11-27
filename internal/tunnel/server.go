@@ -58,7 +58,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	targetConn.SetNoDelay(true)
-	clientAddr := linkConn.RemoteAddr().String()
+	clientAddr := targetConn.RemoteAddr().String()
 	if parsedURL.Fragment != "" {
 		clientIP, _, err := net.SplitHostPort(clientAddr)
 		if err != nil {
