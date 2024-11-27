@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/yosebyte/passport/internal/util"
 	"github.com/yosebyte/passport/pkg/log"
@@ -38,7 +39,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		for {
 			tempConn, err := linkListen.AcceptTCP()
 			if err != nil {
-				log.Error("Unable to accept connections form link address: [%v]", linkAddr)
+				time.Sleep(1 * time.Second)
 				continue
 			}
 			if linkConn != nil {
