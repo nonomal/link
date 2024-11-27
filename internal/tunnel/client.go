@@ -22,7 +22,7 @@ func Client(parsedURL *url.URL) error {
 	}
 	linkConn, err := net.DialTCP("tcp", nil, linkAddr)
 	if err != nil {
-		log.Error("Unable to dial link address [%v]", linkAddr)
+		log.Error("Unable to dial link address: [%v]", linkAddr)
 		return err
 	}
 	linkConn.SetNoDelay(true)
