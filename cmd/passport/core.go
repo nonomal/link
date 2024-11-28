@@ -20,7 +20,7 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 	case "broker":
 		runBroker(parsedURL, rawURL, whiteList)
 	default:
-		log.Fatal("Invalid running core: use server|client|broker://")
+		log.Fatal("Invalid core scheme: run ./passport for more details")
 	}
 }
 
