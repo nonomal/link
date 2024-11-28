@@ -49,6 +49,10 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 				continue
 			}
 		}
+		err = targetConn.SetDeadline(time.Now().Add(5 * time.Second))
+		if err != nil {
+			log.Error("Unable to set deadline: %v", err)
+		}
 		log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
 		_, err = targetConn.Write(readBuffer[:n])
 		if err != nil {
