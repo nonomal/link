@@ -27,42 +27,48 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkConn.Close()
+	targetConn, err := net.DialUDP("udp", nil, targetAddr)
+	if err != nil {
+		log.Error("Unable to dial target address: [%v]", targetAddr)
+		return err
+	}
+	defer targetConn.Close()
+	log.Info("Target connection established: [%v]", targetAddr)
 	readBuffer := make([]byte, 4096)
 	for {
-		n, remoteAddr, err := linkConn.ReadFromUDP(readBuffer)
+		n, clientAddr, err := linkConn.ReadFromUDP(readBuffer)
 		if err != nil {
-			log.Warn("Unable to read from link address: [%v] %v", remoteAddr, err)
+			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
 			time.Sleep(1 * time.Second)
 			continue
 		}
 		if parsedURL.Fragment != "" {
-			clientIP := remoteAddr.IP.String()
+			clientIP := clientAddr.IP.String()
 			if _, exists := whiteList.Load(clientIP); !exists {
 				log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
 				continue
 			}
 		}
-		targetConn, err := net.DialUDP("udp", nil, targetAddr)
+		log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
+		_, err = targetConn.Write(readBuffer[:n])
 		if err != nil {
-			log.Error("Unable to dial target address: [%v]", targetAddr)
-			targetConn.Close()
+			log.Error("Unable to write to target address: [%v] %v", targetAddr, err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
-		log.Info("Target connection established")
-		go func(data []byte, remoteAddr *net.UDPAddr) {
-			defer targetConn.Close()
-			_, err := targetConn.Write(data)
-			if err != nil {
-				log.Error("Unable to write remote data: [%v]", remoteAddr)
-				return
-			}
-			writeBuffer := make([]byte, 4096)
-			n, _, err := targetConn.ReadFromUDP(writeBuffer)
-			if err == nil {
-				log.Info("Starting data transfer: [%v] <-> [%v]", remoteAddr, targetAddr)
-				linkConn.WriteToUDP(writeBuffer[:n], remoteAddr)
-			}
-			log.Info("Connection closed successfully")
-		}(readBuffer[:n], remoteAddr)
+		writeBuffer := make([]byte, 4096)
+		n, _, err = targetConn.ReadFromUDP(writeBuffer)
+		if err != nil {
+			log.Error("Unable to read from target address: [%v] %v", targetAddr, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		_, err = linkConn.WriteToUDP(writeBuffer[:n], clientAddr)
+		if err != nil {
+			log.Error("Unable to write to client address: [%v] %v", clientAddr, err)
+			time.Sleep(1 * time.Second)
+			continue
+		}
+		log.Info("Transfer completed successfully")
 	}
 }
