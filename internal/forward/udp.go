@@ -35,7 +35,6 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 	defer targetConn.Close()
 	log.Info("Target connection established: [%v]", targetAddr)
 	readBuffer := make([]byte, 4096)
-	writeBuffer := make([]byte, 4096)
 	tempSlot := make(chan struct{}, 1024)
 	for {
 		n, clientAddr, err := linkConn.ReadFromUDP(readBuffer)
@@ -54,7 +53,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		tempSlot <- struct{}{}
 		go func(data []byte, clientAddr *net.UDPAddr) {
 			defer func() { <-tempSlot }()
-			err = targetConn.SetDeadline(time.Now().Add(5 * time.Second))
+			err := targetConn.SetDeadline(time.Now().Add(5 * time.Second))
 			if err != nil {
 				log.Error("Unable to set deadline: %v", err)
 				return
@@ -65,7 +64,8 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 				log.Error("Unable to write to target address: [%v] %v", targetAddr, err)
 				return
 			}
-			n, _, err = targetConn.ReadFromUDP(writeBuffer)
+			writeBuffer := make([]byte, 4096)
+			n, _, err := targetConn.ReadFromUDP(writeBuffer)
 			if err != nil {
 				log.Error("Unable to read from target address: [%v] %v", targetAddr, err)
 				return
