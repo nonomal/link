@@ -3,13 +3,18 @@ package main
 import (
 	"net/url"
 	"os"
+	"runtime"
 	"sync"
 
 	"github.com/yosebyte/passport/pkg/log"
 )
 
+var version = "dev"
+
 func readme() {
-	log.Info(`Passport is an all-in-one yet simple tool for network tunneling and port forwarding with secure access control all using 1-URL command. 
+	log.Info(`Passport version: %v %v/%v
+
+Passport is an all-in-one yet simple tool for network tunneling and port forwarding with secure access control all using 1-URL command.
 
 Usage: passport <core_scheme>://<link_address>/<target_address>#<auth_url>
 
@@ -28,7 +33,7 @@ Arguments:
     <link_address>      Tunneling or forwarding address to connect
     <target_address>    Service address to be exposed or forwarded
     <auth_url>          Optional authorizing options in URL format
-`)
+`, version, runtime.GOOS, runtime.GOARCH)
 }
 
 func main() {
