@@ -12,7 +12,7 @@ import (
 var version = "dev"
 
 func readme() {
-	log.Info(`Passport version: %v %v/%v
+	log.Info(`Version: %v %v/%v
 
 Passport is an all-in-one yet simple tool for network tunneling and port forwarding with secure access control all using 1-URL command.
 
