@@ -14,23 +14,24 @@ var version = "dev"
 func readme() {
 	log.Info(`Version: %v %v/%v
 
-Usage: <core_scheme>://<link_address>/<target_address>#<auth_url>
+Usage:
+    passport <core_mode>://<link_addr>/<targ_addr>#<auth_mode>
 
 Examples:
-    # Run as a server
+    # Run as server
     passport server://10.0.0.1:10101/:10022#http://:80/secret
 
-    # Run as a client
+    # Run as client
     passport client://10.0.0.1:10101/127.0.0.1:22
 
-    # Run as a broker
+    # Run as broker
     passport broker://:8080/10.0.0.1:8080#https://:443/secret
 
 Arguments:
-    <core_scheme>    Select from "server", "client" or "broker"
-    <link_address>   Tunneling or forwarding address to connect
-    <target_address> Service address to be exposed or forwarded
-    <auth_url>       Optional authorizing options in URL format
+    <core_mode>    Select from "server", "client" or "broker"
+    <link_addr>    Tunneling or forwarding address to connect
+    <targ_addr>    Service address to be exposed or forwarded
+    <auth_mode>    Optional authorizing options in URL format
 `, version, runtime.GOOS, runtime.GOARCH)
 }
 
