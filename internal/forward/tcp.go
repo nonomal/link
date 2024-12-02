@@ -28,7 +28,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkListen.Close()
-	tempSlot := make(chan struct{}, 1024)
+	semaphore := make(chan struct{}, 1024)
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
@@ -37,9 +37,9 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			continue
 		}
 		linkConn.SetNoDelay(true)
-		tempSlot <- struct{}{}
+		semaphore <- struct{}{}
 		go func(linkConn net.Conn) {
-			defer func() { <-tempSlot }()
+			defer func() { <-semaphore }()
 			clientAddr := linkConn.RemoteAddr().String()
 			log.Info("Client connection established: [%v]", clientAddr)
 			if parsedURL.Fragment != "" {

@@ -27,6 +27,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkConn.Close()
+	semaphore := make(chan struct{}, 1024)
 	for {
 		buffer := make([]byte, 8192)
 		n, clientAddr, err := linkConn.ReadFromUDP(buffer)
@@ -41,7 +42,9 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 				continue
 			}
 		}
-		go func() {
+		semaphore <- struct{}{}
+		go func(buffer []byte, n int, clientAddr *net.UDPAddr) {
+			defer func() { <-semaphore }()
 			targetConn, err := net.DialUDP("udp", nil, targetAddr)
 			if err != nil {
 				log.Error("Unable to dial target address: [%v] %v", targetAddr, err)
@@ -71,6 +74,6 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 				return
 			}
 			log.Info("Transfer completed successfully")
-		}()
+		}(buffer, n, clientAddr)
 	}
 }
