@@ -28,20 +28,20 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	defer linkConn.Close()
 	for {
+		buffer := make([]byte, 8192)
+		n, clientAddr, err := linkConn.ReadFromUDP(buffer)
+		if err != nil {
+			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
+			continue
+		}
+		if parsedURL.Fragment != "" {
+			clientIP := clientAddr.IP.String()
+			if _, exists := whiteList.Load(clientIP); !exists {
+				log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
+				continue
+			}
+		}
 		go func() {
-			buffer := make([]byte, 8192)
-			n, clientAddr, err := linkConn.ReadFromUDP(buffer)
-			if err != nil {
-				log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
-				return
-			}
-			if parsedURL.Fragment != "" {
-				clientIP := clientAddr.IP.String()
-				if _, exists := whiteList.Load(clientIP); !exists {
-					log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
-					return
-				}
-			}
 			targetConn, err := net.DialUDP("udp", nil, targetAddr)
 			if err != nil {
 				log.Error("Unable to dial target address: [%v] %v", targetAddr, err)
