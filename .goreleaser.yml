@@ -10,12 +10,24 @@ builds:
       - linux
       - windows
     goarch:
+      - 386
+      - arm
       - amd64
       - arm64
+      - mips
+      - mipsle
+      - mips64
+      - mips64le
+    goarm:
+      - 6
+      - 7
+    gomips:
+      - hardfloat
+      - softfloat
     flags:
       - -trimpath
     ldflags:
-      - -s -w
+      - -s -w -X main.version={{ .Tag }}
 
 archives:
   - format: tar.gz
