@@ -61,6 +61,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 				linkConn.Close()
 				return
 			}
+			defer targetConn.Close()
 			targetConn.SetNoDelay(true)
 			log.Info("Target connection established: [%v]", targetAddr)
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)

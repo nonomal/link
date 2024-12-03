@@ -38,6 +38,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		log.Error("Unable to accept connections form link address: [%v]", linkAddr)
 		return err
 	}
+	defer linkConn.Close()
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
 	var mu sync.Mutex
 	for {
