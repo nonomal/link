@@ -32,10 +32,10 @@ func Client(parsedURL *url.URL) error {
 	for {
 		n, err := linkConn.Read(buffer)
 		if err != nil {
-			log.Error("Error reading form link address: [%v] %v", linkAddr, err)
-			continue
+			log.Error("Unable to read form link address: [%v] %v", linkAddr, err)
+			break
 		}
-		if string(buffer[:n]) == "PASSPORT\n" {
+		if string(buffer[:n]) == "[PASSPORT]\n" {
 			go func() {
 				targetConn, err := net.DialTCP("tcp", nil, targetAddr)
 				if err != nil {
@@ -51,10 +51,11 @@ func Client(parsedURL *url.URL) error {
 				}
 				defer remoteConn.Close()
 				remoteConn.SetNoDelay(true)
-				log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", remoteConn, targetAddr)
+				log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
 				util.HandleConn(remoteConn, targetConn)
 				log.Info("Connection closed successfully")
 			}()
 		}
 	}
+	return nil
 }

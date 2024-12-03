@@ -45,7 +45,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {
 			log.Error("Unable to accept connections form target address: [%v] %v", targetAddr, err)
-			continue
+			break
 		}
 		targetConn.SetNoDelay(true)
 		clientAddr := targetConn.RemoteAddr().String()
@@ -65,7 +65,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		}
 		go func(targetConn *net.TCPConn) {
 			mu.Lock()
-			_, err = linkConn.Write([]byte("PASSPORT\n"))
+			_, err = linkConn.Write([]byte("[PASSPORT]\n"))
 			mu.Unlock()
 			if err != nil {
 				log.Error("Unable to send signal: %v", err)
@@ -83,4 +83,5 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 			log.Info("Connection closed successfully")
 		}(targetConn)
 	}
+	return nil
 }
