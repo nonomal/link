@@ -25,7 +25,7 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 }
 
 func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Info("Server mode enabled: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Server core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
 		if err := tunnel.Server(parsedURL, whiteList); err != nil {
 			log.Error("Server core error: %v", err)
@@ -36,7 +36,7 @@ func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 }
 
 func runClient(parsedURL *url.URL, rawURL string) {
-	log.Info("Client mode enabled: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Client core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
 		if err := tunnel.Client(parsedURL); err != nil {
 			log.Error("Client core error: %v", err)
@@ -47,7 +47,7 @@ func runClient(parsedURL *url.URL, rawURL string) {
 }
 
 func runBroker(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Info("Broker mode enabled: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Broker core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
 		if err := forward.Broker(parsedURL, whiteList); err != nil {
 			log.Error("Broker core error: %v", err)

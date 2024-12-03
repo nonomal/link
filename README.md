@@ -7,6 +7,7 @@
 ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
 ![GitHub commits since latest release](https://img.shields.io/github/commits-since/yosebyte/passport/latest)
 
+> [!NOTE]
 > The project is in its early development stages, while unstable versions may be pre-released.
 > Please avoid using pre-release binary files or container images with 'latest' tag.
 > Choose the release version displayed on the badge shown above for stable usage.

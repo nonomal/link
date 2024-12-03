@@ -5,7 +5,6 @@ import (
 	"net/url"
 	"strings"
 	"sync"
-	"time"
 
 	"github.com/yosebyte/passport/internal/util"
 	"github.com/yosebyte/passport/pkg/log"
@@ -34,53 +33,57 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer targetListen.Close()
-	var linkConn *net.TCPConn
-	go func() {
-		for {
-			tempConn, err := linkListen.AcceptTCP()
-			if err != nil {
-				time.Sleep(1 * time.Second)
-				continue
-			}
-			if linkConn != nil {
-				log.Warn("Connection closed by target service: [%v]", targetAddr)
-				linkConn.Close()
-			}
-			linkConn = tempConn
-			linkConn.SetNoDelay(true)
-			log.Info("Tunnel connection established")
-		}
-	}()
-	targetConn, err := targetListen.AcceptTCP()
+	linkConn, err := linkListen.AcceptTCP()
 	if err != nil {
-		log.Error("Unable to accept connections form target address: [%v]", targetAddr)
-		linkConn.Close()
+		log.Error("Unable to accept connections form link address: [%v]", linkAddr)
 		return err
 	}
-	targetConn.SetNoDelay(true)
-	clientAddr := targetConn.RemoteAddr().String()
-	log.Info("Target connection established from: [%v]", clientAddr)
-	if parsedURL.Fragment != "" {
-		clientIP, _, err := net.SplitHostPort(clientAddr)
+	defer linkConn.Close()
+	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
+	var mu sync.Mutex
+	semaphore := make(chan struct{}, 1024)
+	for {
+		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {
-			log.Error("Unable to extract client IP address: [%v]", clientAddr)
-			targetConn.Close()
-			linkConn.Close()
-			return err
+			log.Error("Unable to accept connections form target address: [%v] %v", targetAddr, err)
+			break
 		}
-		if _, exists := whiteList.Load(clientIP); !exists && linkConn != nil {
-			log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
-			targetConn.Close()
-			linkConn.Close()
-			return nil
+		targetConn.SetNoDelay(true)
+		clientAddr := targetConn.RemoteAddr().String()
+		log.Info("Target connection established from: [%v]", clientAddr)
+		if parsedURL.Fragment != "" {
+			clientIP, _, err := net.SplitHostPort(clientAddr)
+			if err != nil {
+				log.Error("Unable to extract client IP address: [%v] %v", clientAddr, err)
+				targetConn.Close()
+				continue
+			}
+			if _, exists := whiteList.Load(clientIP); !exists {
+				log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
+				targetConn.Close()
+				continue
+			}
 		}
+		semaphore <- struct{}{}
+		go func(targetConn *net.TCPConn) {
+			defer func() { <-semaphore }()
+			mu.Lock()
+			_, err = linkConn.Write([]byte("[PASSPORT]\n"))
+			mu.Unlock()
+			if err != nil {
+				log.Error("Unable to send signal: %v", err)
+				targetConn.Close()
+				return
+			}
+			remoteConn, err := linkListen.AcceptTCP()
+			if err != nil {
+				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
+				return
+			}
+			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
+			util.HandleConn(remoteConn, targetConn)
+			log.Info("Connection closed successfully")
+		}(targetConn)
 	}
-	if linkConn == nil {
-		targetConn.Close()
-		return nil
-	}
-	log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
-	util.HandleConn(linkConn, targetConn)
-	log.Info("Connection closed successfully")
 	return nil
 }
