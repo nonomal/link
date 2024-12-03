@@ -41,6 +41,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 	defer linkConn.Close()
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
 	var mu sync.Mutex
+	semaphore := make(chan struct{}, 1024)
 	for {
 		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {
@@ -63,7 +64,9 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 				continue
 			}
 		}
+		semaphore <- struct{}{}
 		go func(targetConn *net.TCPConn) {
+			defer func() { <-semaphore }()
 			mu.Lock()
 			_, err = linkConn.Write([]byte("[PASSPORT]\n"))
 			mu.Unlock()
@@ -77,7 +80,6 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
 				return
 			}
-			defer remoteConn.Close()
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			util.HandleConn(remoteConn, targetConn)
 			log.Info("Connection closed successfully")
