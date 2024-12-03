@@ -72,8 +72,14 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 				targetConn.Close()
 				return
 			}
+			remoteConn, err := linkListen.AcceptTCP()
+			if err != nil {
+				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
+				return
+			}
+			defer remoteConn.Close()
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
-			util.HandleConn(linkConn, targetConn)
+			util.HandleConn(remoteConn, targetConn)
 			log.Info("Connection closed successfully")
 		}(targetConn)
 	}

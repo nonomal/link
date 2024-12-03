@@ -44,8 +44,15 @@ func Client(parsedURL *url.URL) error {
 				}
 				defer targetConn.Close()
 				targetConn.SetNoDelay(true)
-				log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
-				util.HandleConn(linkConn, targetConn)
+				remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
+				if err != nil {
+					log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
+					return
+				}
+				defer remoteConn.Close()
+				remoteConn.SetNoDelay(true)
+				log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", remoteConn, targetAddr)
+				util.HandleConn(remoteConn, targetConn)
 				log.Info("Connection closed successfully")
 			}()
 		}
