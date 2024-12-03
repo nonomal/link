@@ -27,13 +27,14 @@ func Client(parsedURL *url.URL) error {
 	}
 	linkConn.SetNoDelay(true)
 	log.Info("Tunnel connection established to: [%v]", linkAddr)
+	buffer := make([]byte, 16)
 	for {
-		buffer := make([]byte, 16)
-		if _, err := linkConn.Read(buffer); err != nil {
+		n, err := linkConn.Read(buffer)
+		if err != nil {
 			log.Error("Error reading form link address: [%v] %v", linkAddr, err)
 			continue
 		}
-		if string(buffer) == "PASSPORT\n" {
+		if string(buffer[:n]) == "PASSPORT\n" {
 			go func() {
 				targetConn, err := net.DialTCP("tcp", nil, targetAddr)
 				if err != nil {
@@ -45,8 +46,6 @@ func Client(parsedURL *url.URL) error {
 				util.HandleConn(linkConn, targetConn)
 				log.Info("Connection closed successfully")
 			}()
-		} else {
-			log.Warn("Unexpected data received: %v", string(buffer))
 		}
 	}
 }

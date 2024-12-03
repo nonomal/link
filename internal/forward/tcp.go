@@ -38,7 +38,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 		}
 		linkConn.SetNoDelay(true)
 		semaphore <- struct{}{}
-		go func(linkConn net.Conn) {
+		go func(linkConn *net.TCPConn) {
 			defer func() { <-semaphore }()
 			clientAddr := linkConn.RemoteAddr().String()
 			log.Info("Client connection established: [%v]", clientAddr)

@@ -39,6 +39,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
+	var mu sync.Mutex
 	for {
 		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {
@@ -61,8 +62,11 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 				continue
 			}
 		}
-		go func() {
-			if _, err = linkConn.Write([]byte("PASSPORT\n")); err != nil {
+		go func(targetConn *net.TCPConn) {
+			mu.Lock()
+			_, err = linkConn.Write([]byte("PASSPORT\n"))
+			mu.Unlock()
+			if err != nil {
 				log.Error("Unable to send signal: %v", err)
 				targetConn.Close()
 				return
@@ -70,6 +74,6 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			util.HandleConn(linkConn, targetConn)
 			log.Info("Connection closed successfully")
-		}()
+		}(targetConn)
 	}
 }
