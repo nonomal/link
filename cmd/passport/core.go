@@ -2,6 +2,7 @@ package main
 
 import (
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -20,7 +21,8 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 	case "broker":
 		runBroker(parsedURL, rawURL, whiteList)
 	default:
-		log.Fatal("Invalid core scheme: run ./passport for more details")
+		readme()
+		os.Exit(1)
 	}
 }
 
