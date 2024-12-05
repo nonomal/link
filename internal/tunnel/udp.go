@@ -38,12 +38,11 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			mu.Unlock()
 			if err != nil {
 				log.Error("Unable to send signal: %v", err)
-				targetConn.Close()
 				return
 			}
 			remoteConn, err := linkListen.AcceptTCP()
 			if err != nil {
-				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
+				log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
 				return
 			}
 			defer remoteConn.Close()
