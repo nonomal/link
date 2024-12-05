@@ -36,7 +36,6 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			time.Sleep(1 * time.Second)
 			continue
 		}
-		linkConn.SetNoDelay(true)
 		semaphore <- struct{}{}
 		go func(linkConn *net.TCPConn) {
 			defer func() { <-semaphore }()
@@ -61,7 +60,6 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 				linkConn.Close()
 				return
 			}
-			targetConn.SetNoDelay(true)
 			log.Info("Target connection established: [%v]", targetAddr)
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			util.HandleConn(linkConn, targetConn)
