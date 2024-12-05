@@ -3,43 +3,18 @@ package tunnel
 import (
 	"net"
 	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeUDP(parsedURL *url.URL, whiteList *sync.Map) error {
-	linkAddr, err := net.ResolveTCPAddr("tcp", parsedURL.Host)
-	if err != nil {
-		log.Error("Unable to resolve link address: %v", parsedURL.Host)
-		return err
-	}
-	targetAddr, err := net.ResolveUDPAddr("udp", strings.TrimPrefix(parsedURL.Path, "/"))
-	if err != nil {
-		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
-		return err
-	}
-	linkListen, err := net.ListenTCP("tcp", linkAddr)
-	if err != nil {
-		log.Error("Unable to listen link address: [%v]", linkAddr)
-		return err
-	}
-	defer linkListen.Close()
-	linkConn, err := linkListen.AcceptTCP()
-	if err != nil {
-		log.Error("Unable to accept connections form link address: [%v]", linkAddr)
-		return err
-	}
-	defer linkConn.Close()
-	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
+func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn, mu *sync.Mutex) error {
 	targetConn, err := net.ListenUDP("udp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetConn.Close()
-	var mu sync.Mutex
 	semaphore := make(chan struct{}, 1024)
 	for {
 		buffer := make([]byte, 8192)

@@ -3,44 +3,19 @@ package tunnel
 import (
 	"net"
 	"net/url"
-	"strings"
 	"sync"
 
 	"github.com/yosebyte/passport/internal/util"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeTCP(parsedURL *url.URL, whiteList *sync.Map) error {
-	linkAddr, err := net.ResolveTCPAddr("tcp", parsedURL.Host)
-	if err != nil {
-		log.Error("Unable to resolve link address: %v", parsedURL.Host)
-		return err
-	}
-	targetAddr, err := net.ResolveTCPAddr("tcp", strings.TrimPrefix(parsedURL.Path, "/"))
-	if err != nil {
-		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
-		return err
-	}
-	linkListen, err := net.ListenTCP("tcp", linkAddr)
-	if err != nil {
-		log.Error("Unable to listen link address: [%v]", linkAddr)
-		return err
-	}
-	defer linkListen.Close()
+func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn, mu *sync.Mutex) error {
 	targetListen, err := net.ListenTCP("tcp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetListen.Close()
-	linkConn, err := linkListen.AcceptTCP()
-	if err != nil {
-		log.Error("Unable to accept connections form link address: [%v]", linkAddr)
-		return err
-	}
-	defer linkConn.Close()
-	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
-	var mu sync.Mutex
 	semaphore := make(chan struct{}, 1024)
 	for {
 		targetConn, err := targetListen.AcceptTCP()
