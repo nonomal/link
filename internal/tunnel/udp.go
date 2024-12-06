@@ -38,15 +38,15 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			log.Error("Unable to send signal: %v", err)
 			break
 		}
-		remoteConn, err := linkListen.AcceptTCP()
-		if err != nil {
-			log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
-			continue
-		}
-		defer remoteConn.Close()
 		semaphore <- struct{}{}
-		go func(buffer []byte, n int, remoteConn *net.TCPConn, clientAddr *net.UDPAddr) {
+		go func(buffer []byte, n int, clientAddr *net.UDPAddr) {
 			defer func() { <-semaphore }()
+			remoteConn, err := linkListen.AcceptTCP()
+			if err != nil {
+				log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
+				return
+			}
+			defer remoteConn.Close()
 			log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
 			_, err = remoteConn.Write(buffer[:n])
 			if err != nil {
@@ -64,7 +64,7 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 				return
 			}
 			log.Info("Transfer completed successfully")
-		}(buffer, n, remoteConn, clientAddr)
+		}(buffer, n, clientAddr)
 	}
 	return nil
 }
