@@ -61,14 +61,14 @@ func Client(parsedURL *url.URL) error {
 			}()
 		}
 		if string(buffer[:n]) == "[PASSPORT]<UDP>\n" {
-			remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
-			if err != nil {
-				log.Error("Unable to dial target address: [%v]", linkAddr)
-				return err
-			}
-			defer remoteConn.Close()
-			log.Info("Remote connection established: [%v]", linkAddr)
-			go func(remoteConn *net.TCPConn) {
+			go func() {
+				remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
+				if err != nil {
+					log.Error("Unable to dial target address: [%v] %v", linkAddr, err)
+					return
+				}
+				defer remoteConn.Close()
+				log.Info("Remote connection established: [%v]", linkAddr)
 				buffer := make([]byte, 8192)
 				n, err := remoteConn.Read(buffer)
 				if err != nil {
@@ -104,7 +104,7 @@ func Client(parsedURL *url.URL) error {
 					return
 				}
 				log.Info("Transfer completed successfully")
-			}(remoteConn)
+			}()
 		}
 	}
 	return nil
