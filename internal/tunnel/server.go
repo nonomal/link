@@ -38,13 +38,12 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 	}
 	defer linkConn.Close()
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
-	mu := &sync.Mutex{}
 	errChan := make(chan error, 2)
 	go func() {
-		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkConn, mu)
+		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkConn)
 	}()
 	go func() {
-		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkConn, mu)
+		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkConn)
 	}()
 	return <-errChan
 }

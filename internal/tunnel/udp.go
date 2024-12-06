@@ -8,20 +8,21 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn, mu *sync.Mutex) error {
+func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn) error {
 	targetConn, err := net.ListenUDP("udp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetConn.Close()
+	var mu sync.Mutex
 	semaphore := make(chan struct{}, 1024)
 	for {
 		buffer := make([]byte, 8192)
 		n, clientAddr, err := targetConn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
-			continue
+			break
 		}
 		if parsedURL.Fragment != "" {
 			clientIP := clientAddr.IP.String()
@@ -65,4 +66,5 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			log.Info("Transfer completed successfully")
 		}(buffer, n, clientAddr)
 	}
+	return nil
 }

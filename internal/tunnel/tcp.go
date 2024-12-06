@@ -9,13 +9,14 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn, mu *sync.Mutex) error {
+func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn) error {
 	targetListen, err := net.ListenTCP("tcp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetListen.Close()
+	var mu sync.Mutex
 	semaphore := make(chan struct{}, 1024)
 	for {
 		targetConn, err := targetListen.AcceptTCP()
