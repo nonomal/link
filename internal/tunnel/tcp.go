@@ -24,6 +24,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			log.Error("Unable to accept connections form target address: [%v] %v", targetAddr, err)
 			break
 		}
+		defer targetConn.Close()
 		clientAddr := targetConn.RemoteAddr().String()
 		log.Info("Target connection established from: [%v]", clientAddr)
 		if parsedURL.Fragment != "" {
@@ -55,6 +56,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
 				return
 			}
+			defer remoteConn.Close()
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			util.HandleConn(remoteConn, targetConn)
 			log.Info("Connection closed successfully")
