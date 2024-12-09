@@ -21,7 +21,7 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 	case "broker":
 		runBroker(parsedURL, rawURL, whiteList)
 	default:
-		readme()
+		helpInfo()
 		os.Exit(1)
 	}
 }
