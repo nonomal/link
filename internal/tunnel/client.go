@@ -32,7 +32,7 @@ func Client(parsedURL *url.URL) error {
 	}
 	defer linkConn.Close()
 	log.Info("Tunnel connection established to: [%v]", linkAddr)
-	buffer := make([]byte, internal.MinBufferSize)
+	buffer := make([]byte, internal.MaxSignalBuffer)
 	for {
 		n, err := linkConn.Read(buffer)
 		if err != nil {

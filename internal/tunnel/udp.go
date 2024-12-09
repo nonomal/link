@@ -18,9 +18,9 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 	}
 	defer targetConn.Close()
 	var mu sync.Mutex
-	semaphore := make(chan struct{}, internal.MaxSemaphore)
+	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
-		buffer := make([]byte, internal.MaxBufferSize)
+		buffer := make([]byte, internal.MaxDataBuffer)
 		n, clientAddr, err := targetConn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
@@ -45,10 +45,10 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
 			continue
 		}
-		semaphore <- struct{}{}
+		sem <- struct{}{}
 		go func(buffer []byte, n int, remoteConn *net.TCPConn, clientAddr *net.UDPAddr) {
 			defer func() {
-				<-semaphore
+				<-sem
 				remoteConn.Close()
 			}()
 			log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
@@ -81,7 +81,7 @@ func ClientUDP(linkAddr *net.TCPAddr, targetUDPAddr *net.UDPAddr) {
 	}
 	defer remoteConn.Close()
 	log.Info("Remote connection established: [%v]", linkAddr)
-	buffer := make([]byte, internal.MaxBufferSize)
+	buffer := make([]byte, internal.MaxDataBuffer)
 	n, err := remoteConn.Read(buffer)
 	if err != nil {
 		log.Error("Unable to read from remote address: [%v] %v", linkAddr, err)
@@ -94,7 +94,7 @@ func ClientUDP(linkAddr *net.TCPAddr, targetUDPAddr *net.UDPAddr) {
 	}
 	defer targetConn.Close()
 	log.Info("Target connection established: [%v]", targetUDPAddr)
-	err = targetConn.SetDeadline(time.Now().Add(internal.MaxUDPDeadline * time.Second))
+	err = targetConn.SetDeadline(time.Now().Add(internal.MaxUDPTimeout * time.Second))
 	if err != nil {
 		log.Error("Unable to set deadline: %v", err)
 		return

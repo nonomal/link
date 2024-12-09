@@ -29,7 +29,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkListen.Close()
-	semaphore := make(chan struct{}, internal.MaxSemaphore)
+	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
@@ -37,9 +37,9 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			time.Sleep(1 * time.Second)
 			continue
 		}
-		semaphore <- struct{}{}
+		sem <- struct{}{}
 		go func(linkConn *net.TCPConn) {
-			defer func() { <-semaphore }()
+			defer func() { <-sem }()
 			clientAddr := linkConn.RemoteAddr().String()
 			log.Info("Client connection established: [%v]", clientAddr)
 			if parsedURL.Fragment != "" {

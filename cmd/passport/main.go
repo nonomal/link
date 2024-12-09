@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	version = "dev"
+	version   = "dev"
 	whiteList sync.Map
 )
 

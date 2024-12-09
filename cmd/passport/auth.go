@@ -5,7 +5,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yosebyte/passport/internal/auth"
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -20,7 +20,7 @@ func authSetups(parsedURL *url.URL, whiteList *sync.Map) {
 	log.Info("Auth mode enabled: %v", parsedAuthURL)
 	go func() {
 		for {
-			if err := auth.HandleHTTP(parsedAuthURL, whiteList); err != nil {
+			if err := internal.HandleHTTP(parsedAuthURL, whiteList); err != nil {
 				log.Error("Auth mode error: %v", err)
 				log.Info("Restarting in 1s...")
 				time.Sleep(1 * time.Second)

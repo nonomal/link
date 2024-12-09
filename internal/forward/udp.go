@@ -28,9 +28,9 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkConn.Close()
-	semaphore := make(chan struct{}, internal.MaxSemaphore)
+	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
-		buffer := make([]byte, internal.MaxBufferSize)
+		buffer := make([]byte, internal.MaxDataBuffer)
 		n, clientAddr, err := linkConn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
@@ -43,9 +43,9 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 				continue
 			}
 		}
-		semaphore <- struct{}{}
+		sem <- struct{}{}
 		go func(buffer []byte, n int, clientAddr *net.UDPAddr) {
-			defer func() { <-semaphore }()
+			defer func() { <-sem }()
 			targetConn, err := net.DialUDP("udp", nil, targetAddr)
 			if err != nil {
 				log.Error("Unable to dial target address: [%v] %v", targetAddr, err)
@@ -53,7 +53,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 			}
 			defer targetConn.Close()
 			log.Info("Target connection established: [%v]", targetAddr)
-			err = targetConn.SetDeadline(time.Now().Add(internal.MaxUDPDeadline * time.Second))
+			err = targetConn.SetDeadline(time.Now().Add(internal.MaxUDPTimeout * time.Second))
 			if err != nil {
 				log.Error("Unable to set deadline: %v", err)
 				return

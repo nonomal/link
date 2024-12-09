@@ -1,8 +1,8 @@
 package internal
 
 const (
-	MaxSemaphore   = 1024
-	MaxBufferSize  = 8192
-	MinBufferSize  = 1024
-	MaxUDPDeadline = 5
+	MaxSemaphoreLimit = 1024
+	MaxSignalBuffer   = 1024
+	MaxDataBuffer     = 8192
+	MaxUDPTimeout     = 5
 )

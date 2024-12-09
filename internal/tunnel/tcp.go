@@ -18,7 +18,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 	}
 	defer targetListen.Close()
 	var mu sync.Mutex
-	semaphore := make(chan struct{}, internal.MaxSemaphore)
+	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {
@@ -40,10 +40,10 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				continue
 			}
 		}
-		semaphore <- struct{}{}
+		sem <- struct{}{}
 		go func(targetConn *net.TCPConn) {
 			defer func() {
-				<-semaphore
+				<-sem
 				targetConn.Close()
 			}()
 			mu.Lock()
