@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"sync"
 
-	"github.com/yosebyte/passport/internal/util"
+	"github.com/yosebyte/passport/pkg/conn"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -60,7 +60,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			}
 			defer remoteConn.Close()
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
-			util.HandleConn(remoteConn, targetConn)
+			conn.DataExchange(remoteConn, targetConn)
 			log.Info("Connection closed successfully")
 		}(targetConn)
 	}
@@ -82,6 +82,6 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 	}
 	defer remoteConn.Close()
 	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
-	util.HandleConn(remoteConn, targetConn)
+	conn.DataExchange(remoteConn, targetConn)
 	log.Info("Connection closed successfully")
 }

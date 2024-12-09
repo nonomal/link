@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yosebyte/passport/internal/util"
+	"github.com/yosebyte/passport/pkg/conn"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -62,7 +62,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			}
 			log.Info("Target connection established: [%v]", targetAddr)
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
-			util.HandleConn(linkConn, targetConn)
+			conn.DataExchange(linkConn, targetConn)
 			log.Info("Connection closed successfully")
 		}(linkConn)
 	}

@@ -1,11 +1,11 @@
-package util
+package conn
 
 import (
 	"io"
 	"net"
 )
 
-func HandleConn(conn1, conn2 *net.TCPConn) {
+func DataExchange(conn1, conn2 *net.TCPConn) {
 	done := make(chan struct{}, 2)
 	go func() {
 		io.Copy(conn1, conn2)
