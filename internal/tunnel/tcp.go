@@ -24,7 +24,6 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			log.Error("Unable to accept connections form target address: [%v] %v", targetAddr, err)
 			break
 		}
-		defer targetConn.Close()
 		clientAddr := targetConn.RemoteAddr().String()
 		log.Info("Target connection established from: [%v]", clientAddr)
 		if parsedURL.Fragment != "" {
@@ -42,7 +41,10 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 		}
 		semaphore <- struct{}{}
 		go func(targetConn *net.TCPConn) {
-			defer func() { <-semaphore }()
+			defer func() {
+				<-semaphore
+				targetConn.Close()
+			}()
 			mu.Lock()
 			_, err = linkConn.Write([]byte("[PASSPORT]<TCP>\n"))
 			mu.Unlock()

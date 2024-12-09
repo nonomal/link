@@ -43,10 +43,12 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
 			continue
 		}
-		defer remoteConn.Close()
 		semaphore <- struct{}{}
 		go func(buffer []byte, n int, remoteConn *net.TCPConn, clientAddr *net.UDPAddr) {
-			defer func() { <-semaphore }()
+			defer func() {
+				<-semaphore
+				remoteConn.Close()
+			}()
 			log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
 			_, err = remoteConn.Write(buffer[:n])
 			if err != nil {
