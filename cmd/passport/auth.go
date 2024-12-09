@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"net/url"
 	"sync"
 	"time"
@@ -9,7 +10,7 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func authSetups(parsedURL *url.URL, whiteList *sync.Map) {
+func authSetups(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) {
 	if parsedURL.Fragment == "" {
 		return
 	}
@@ -20,7 +21,7 @@ func authSetups(parsedURL *url.URL, whiteList *sync.Map) {
 	log.Info("Auth mode enabled: %v", parsedAuthURL)
 	go func() {
 		for {
-			if err := internal.HandleHTTP(parsedAuthURL, whiteList); err != nil {
+			if err := internal.HandleHTTP(parsedAuthURL, whiteList, tlsConfig); err != nil {
 				log.Error("Auth mode error: %v", err)
 				log.Info("Restarting in 1s...")
 				time.Sleep(1 * time.Second)

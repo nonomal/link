@@ -1,6 +1,7 @@
 package tunnel
 
 import (
+	"crypto/tls"
 	"net"
 	"net/url"
 	"strings"
@@ -9,7 +10,7 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func Server(parsedURL *url.URL, whiteList *sync.Map) error {
+func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) error {
 	linkAddr, err := net.ResolveTCPAddr("tcp", parsedURL.Host)
 	if err != nil {
 		log.Error("Unable to resolve link address: %v", parsedURL.Host)
@@ -25,13 +26,13 @@ func Server(parsedURL *url.URL, whiteList *sync.Map) error {
 		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
 		return err
 	}
-	linkListen, err := net.ListenTCP("tcp", linkAddr)
+	linkListen, err := tls.Listen("tcp", linkAddr.String(), tlsConfig)
 	if err != nil {
 		log.Error("Unable to listen link address: [%v]", linkAddr)
 		return err
 	}
 	defer linkListen.Close()
-	linkConn, err := linkListen.AcceptTCP()
+	linkConn, err := linkListen.Accept()
 	if err != nil {
 		log.Error("Unable to accept connections form link address: [%v]", linkAddr)
 		return err

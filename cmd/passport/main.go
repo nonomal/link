@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"github.com/yosebyte/passport/pkg/log"
+	"github.com/yosebyte/passport/pkg/tls"
 )
 
 var (
@@ -23,6 +24,10 @@ func main() {
 	if err != nil {
 		log.Fatal("Error parsing raw URL: %v", err)
 	}
-	authSetups(parsedURL, &whiteList)
-	coreSelect(parsedURL, rawURL, &whiteList)
+	tlsConfig, err := tls.NewTLSconfig("")
+	if err != nil {
+		log.Error("Error generating TLS config: %v", err)
+	}
+	authSetups(parsedURL, &whiteList, tlsConfig)
+	coreSelect(parsedURL, rawURL, &whiteList, tlsConfig)
 }

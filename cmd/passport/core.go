@@ -1,6 +1,7 @@
 package main
 
 import (
+	"crypto/tls"
 	"net/url"
 	"os"
 	"strings"
@@ -12,10 +13,10 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
+func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map, tlsConfig *tls.Config) {
 	switch parsedURL.Scheme {
 	case "server":
-		runServer(parsedURL, rawURL, whiteList)
+		runServer(parsedURL, rawURL, whiteList, tlsConfig)
 	case "client":
 		runClient(parsedURL, rawURL)
 	case "broker":
@@ -26,10 +27,10 @@ func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 	}
 }
 
-func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
+func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map, tlsConfig *tls.Config) {
 	log.Info("Server core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
-		if err := tunnel.Server(parsedURL, whiteList); err != nil {
+		if err := tunnel.Server(parsedURL, whiteList, tlsConfig); err != nil {
 			log.Error("Server core error: %v", err)
 			log.Info("Restarting in 1s...")
 			time.Sleep(1 * time.Second)

@@ -1,6 +1,7 @@
 package tunnel
 
 import (
+	"crypto/tls"
 	"net"
 	"net/url"
 	"sync"
@@ -10,7 +11,7 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn) error {
+func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen net.Listener, linkConn net.Conn) error {
 	targetListen, err := net.ListenTCP("tcp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
@@ -54,7 +55,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				targetConn.Close()
 				return
 			}
-			remoteConn, err := linkListen.AcceptTCP()
+			remoteConn, err := linkListen.Accept()
 			if err != nil {
 				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
 				return
@@ -76,7 +77,7 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 	}
 	defer targetConn.Close()
 	log.Info("Target connection established: [%v]", targetTCPAddr)
-	remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
+	remoteConn, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
 		return

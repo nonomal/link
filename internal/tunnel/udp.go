@@ -1,6 +1,7 @@
 package tunnel
 
 import (
+	"crypto/tls"
 	"net"
 	"net/url"
 	"sync"
@@ -10,7 +11,7 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen *net.TCPListener, linkConn *net.TCPConn) error {
+func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen net.Listener, linkConn net.Conn) error {
 	targetConn, err := net.ListenUDP("udp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
@@ -40,13 +41,13 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			log.Error("Unable to send signal: %v", err)
 			break
 		}
-		remoteConn, err := linkListen.AcceptTCP()
+		remoteConn, err := linkListen.Accept()
 		if err != nil {
 			log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
 			continue
 		}
 		sem <- struct{}{}
-		go func(buffer []byte, n int, remoteConn *net.TCPConn, clientAddr *net.UDPAddr) {
+		go func(buffer []byte, n int, remoteConn net.Conn, clientAddr *net.UDPAddr) {
 			defer func() {
 				<-sem
 				remoteConn.Close()
@@ -74,7 +75,7 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 }
 
 func ClientUDP(linkAddr *net.TCPAddr, targetUDPAddr *net.UDPAddr) {
-	remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
+	remoteConn, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial target address: [%v] %v", linkAddr, err)
 		return

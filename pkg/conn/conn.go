@@ -5,7 +5,7 @@ import (
 	"net"
 )
 
-func DataExchange(conn1, conn2 *net.TCPConn) {
+func DataExchange(conn1, conn2 net.Conn) {
 	done := make(chan struct{}, 2)
 	go func() {
 		io.Copy(conn1, conn2)

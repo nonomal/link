@@ -1,16 +1,16 @@
 package internal
 
 import (
+	"crypto/tls"
 	"net"
 	"net/http"
 	"net/url"
 	"sync"
 
 	"github.com/yosebyte/passport/pkg/log"
-	"github.com/yosebyte/passport/pkg/tls"
 )
 
-func HandleHTTP(parsedURL *url.URL, whiteList *sync.Map) error {
+func HandleHTTP(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) error {
 	http.HandleFunc(parsedURL.Path, func(w http.ResponseWriter, r *http.Request) {
 		clientIP, _, err := net.SplitHostPort(r.RemoteAddr)
 		if err != nil {
@@ -30,11 +30,6 @@ func HandleHTTP(parsedURL *url.URL, whiteList *sync.Map) error {
 			return err
 		}
 	} else {
-		tlsConfig, err := tls.NewTLSconfig(parsedURL.Hostname())
-		if err != nil {
-			log.Error("Error generating TLS config: %v", err)
-			return err
-		}
 		authServer := &http.Server{
 			Addr:      parsedURL.Host,
 			TLSConfig: tlsConfig,

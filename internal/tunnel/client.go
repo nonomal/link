@@ -1,6 +1,7 @@
 package tunnel
 
 import (
+	"crypto/tls"
 	"net"
 	"net/url"
 	"strings"
@@ -25,7 +26,7 @@ func Client(parsedURL *url.URL) error {
 		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
 		return err
 	}
-	linkConn, err := net.DialTCP("tcp", nil, linkAddr)
+	linkConn, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial link address: [%v]", linkAddr)
 		return err
