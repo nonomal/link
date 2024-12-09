@@ -24,7 +24,7 @@ func main() {
 	if err != nil {
 		log.Fatal("Error parsing raw URL: %v", err)
 	}
-	tlsConfig, err := tls.NewTLSconfig("")
+	tlsConfig, err := tls.NewTLSconfig("yosebyte/passport " + version)
 	if err != nil {
 		log.Error("Error generating TLS config: %v", err)
 	}

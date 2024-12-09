@@ -75,14 +75,12 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 		log.Error("Unable to dial target address: [%v], %v", targetTCPAddr, err)
 		return
 	}
-	defer targetConn.Close()
 	log.Info("Target connection established: [%v]", targetTCPAddr)
 	remoteConn, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
 		return
 	}
-	defer remoteConn.Close()
 	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
 	conn.DataExchange(remoteConn, targetConn)
 	log.Info("Connection closed successfully")
