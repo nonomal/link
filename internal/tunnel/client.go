@@ -4,9 +4,7 @@ import (
 	"net"
 	"net/url"
 	"strings"
-	"time"
 
-	"github.com/yosebyte/passport/internal/util"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -41,70 +39,10 @@ func Client(parsedURL *url.URL) error {
 			break
 		}
 		if string(buffer[:n]) == "[PASSPORT]<TCP>\n" {
-			go func() {
-				targetConn, err := net.DialTCP("tcp", nil, targetTCPAddr)
-				if err != nil {
-					log.Error("Unable to dial target address: [%v], %v", targetTCPAddr, err)
-					return
-				}
-				defer targetConn.Close()
-				log.Info("Target connection established: [%v]", targetTCPAddr)
-				remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
-				if err != nil {
-					log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
-					return
-				}
-				defer remoteConn.Close()
-				log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
-				util.HandleConn(remoteConn, targetConn)
-				log.Info("Connection closed successfully")
-			}()
+			go ClientTCP(linkAddr, targetTCPAddr)
 		}
 		if string(buffer[:n]) == "[PASSPORT]<UDP>\n" {
-			go func() {
-				remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
-				if err != nil {
-					log.Error("Unable to dial target address: [%v] %v", linkAddr, err)
-					return
-				}
-				defer remoteConn.Close()
-				log.Info("Remote connection established: [%v]", linkAddr)
-				buffer := make([]byte, 8192)
-				n, err := remoteConn.Read(buffer)
-				if err != nil {
-					log.Error("Unable to read from remote address: [%v] %v", linkAddr, err)
-					return
-				}
-				targetConn, err := net.DialUDP("udp", nil, targetUDPAddr)
-				if err != nil {
-					log.Error("Unable to dial target address: [%v] %v", targetUDPAddr, err)
-					return
-				}
-				defer targetConn.Close()
-				log.Info("Target connection established: [%v]", targetUDPAddr)
-				err = targetConn.SetDeadline(time.Now().Add(5 * time.Second))
-				if err != nil {
-					log.Error("Unable to set deadline: %v", err)
-					return
-				}
-				log.Info("Starting data transfer: [%v] <-> [%v]", linkAddr, targetUDPAddr)
-				_, err = targetConn.Write(buffer[:n])
-				if err != nil {
-					log.Error("Unable to write to target address: [%v] %v", targetUDPAddr, err)
-					return
-				}
-				n, _, err = targetConn.ReadFromUDP(buffer)
-				if err != nil {
-					log.Error("Unable to read from target address: [%v] %v", targetUDPAddr, err)
-					return
-				}
-				_, err = remoteConn.Write(buffer[:n])
-				if err != nil {
-					log.Error("Unable to write to remote address: [%v] %v", linkAddr, err)
-					return
-				}
-				log.Info("Transfer completed successfully")
-			}()
+			go ClientUDP(linkAddr, targetUDPAddr)
 		}
 	}
 	return nil

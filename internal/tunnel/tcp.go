@@ -66,3 +66,22 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 	}
 	return nil
 }
+
+func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
+	targetConn, err := net.DialTCP("tcp", nil, targetTCPAddr)
+	if err != nil {
+		log.Error("Unable to dial target address: [%v], %v", targetTCPAddr, err)
+		return
+	}
+	defer targetConn.Close()
+	log.Info("Target connection established: [%v]", targetTCPAddr)
+	remoteConn, err := net.DialTCP("tcp", nil, linkAddr)
+	if err != nil {
+		log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
+		return
+	}
+	defer remoteConn.Close()
+	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
+	util.HandleConn(remoteConn, targetConn)
+	log.Info("Connection closed successfully")
+}
