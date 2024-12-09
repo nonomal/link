@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -31,7 +32,7 @@ func Client(parsedURL *url.URL) error {
 	}
 	defer linkConn.Close()
 	log.Info("Tunnel connection established to: [%v]", linkAddr)
-	buffer := make([]byte, 1024)
+	buffer := make([]byte, internal.MinBufferSize)
 	for {
 		n, err := linkConn.Read(buffer)
 		if err != nil {

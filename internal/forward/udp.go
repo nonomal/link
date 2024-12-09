@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -27,9 +28,9 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkConn.Close()
-	semaphore := make(chan struct{}, 1024)
+	semaphore := make(chan struct{}, internal.MaxSemaphore)
 	for {
-		buffer := make([]byte, 8192)
+		buffer := make([]byte, internal.MaxBufferSize)
 		n, clientAddr, err := linkConn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
@@ -52,7 +53,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 			}
 			defer targetConn.Close()
 			log.Info("Target connection established: [%v]", targetAddr)
-			err = targetConn.SetDeadline(time.Now().Add(5 * time.Second))
+			err = targetConn.SetDeadline(time.Now().Add(internal.MaxUDPDeadline * time.Second))
 			if err != nil {
 				log.Error("Unable to set deadline: %v", err)
 				return

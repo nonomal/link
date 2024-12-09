@@ -5,6 +5,7 @@ import (
 	"net/url"
 	"sync"
 
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/conn"
 	"github.com/yosebyte/passport/pkg/log"
 )
@@ -17,7 +18,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 	}
 	defer targetListen.Close()
 	var mu sync.Mutex
-	semaphore := make(chan struct{}, 1024)
+	semaphore := make(chan struct{}, internal.MaxSemaphore)
 	for {
 		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {

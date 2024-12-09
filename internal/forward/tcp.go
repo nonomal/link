@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/conn"
 	"github.com/yosebyte/passport/pkg/log"
 )
@@ -28,7 +29,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkListen.Close()
-	semaphore := make(chan struct{}, 1024)
+	semaphore := make(chan struct{}, internal.MaxSemaphore)
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {

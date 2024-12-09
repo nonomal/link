@@ -8,7 +8,10 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-var version = "dev"
+var (
+	version = "dev"
+	whiteList sync.Map
+)
 
 func main() {
 	if len(os.Args) < 2 {
@@ -20,7 +23,6 @@ func main() {
 	if err != nil {
 		log.Fatal("Error parsing raw URL: %v", err)
 	}
-	var whiteList sync.Map
 	authSetups(parsedURL, &whiteList)
 	coreSelect(parsedURL, rawURL, &whiteList)
 }
