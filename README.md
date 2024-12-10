@@ -30,38 +30,19 @@
 - **Zero Dependencies**: Fully self-contained, with no external dependencies, ensuring a simple and efficient setup.
 - **Zero Configuration File**: Simply execute with a single URL command, making it ideal for containerized environments.
 
-## Ideas
+## Designs
 
 ### Network Tunneling
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Server
-    participant Client
-    participant Target
-
-    User->>Server: TCP/UDP Request
-    Server->>Client: [TLS]Launch Signal
-    Client<<->>Server: [TLS] Connection
-    Client->>Target: TCP/UDP Request
-    Target->>Client: TCP/UDP Response
-    Server->>User: TCP/UDP Response
-```
+<div align="center">
+  <img src="https://cdn.185610.xyz/assets/tunnel.png" alt="tunnel">
+</div>
 
 ### Port Forwarding
 
-```mermaid
-sequenceDiagram
-    participant User
-    participant Broker
-    participant Target
-
-    User->>Broker: TCP/UDP Request
-    Broker->>Target: TCP/UDP Request
-    Target->>Broker: TCP/UDP Response
-    Broker->>User: TCP/UDP Response
-```
+<div align="center">
+  <img src="https://cdn.185610.xyz/assets/forward.png" alt="forward">
+</div>
 
 ## Usage
 
