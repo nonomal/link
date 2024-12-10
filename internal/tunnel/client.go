@@ -1,11 +1,12 @@
 package tunnel
 
 import (
+	"crypto/tls"
 	"net"
 	"net/url"
 	"strings"
 
-	"github.com/yosebyte/passport/internal/util"
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -15,27 +16,36 @@ func Client(parsedURL *url.URL) error {
 		log.Error("Unable to resolve link address: %v", parsedURL.Host)
 		return err
 	}
-	targetAddr, err := net.ResolveTCPAddr("tcp", strings.TrimPrefix(parsedURL.Path, "/"))
+	targetTCPAddr, err := net.ResolveTCPAddr("tcp", strings.TrimPrefix(parsedURL.Path, "/"))
 	if err != nil {
 		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
 		return err
 	}
-	linkConn, err := net.DialTCP("tcp", nil, linkAddr)
+	targetUDPAddr, err := net.ResolveUDPAddr("udp", strings.TrimPrefix(parsedURL.Path, "/"))
+	if err != nil {
+		log.Error("Unable to resolve target address: %v", strings.TrimPrefix(parsedURL.Path, "/"))
+		return err
+	}
+	linkConn, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial link address: [%v]", linkAddr)
 		return err
 	}
-	linkConn.SetNoDelay(true)
-	log.Info("Tunnel connection established")
-	targetConn, err := net.DialTCP("tcp", nil, targetAddr)
-	if err != nil {
-		log.Error("Unable to dial target address: [%v]", targetAddr)
-		linkConn.Close()
-		return err
+	defer linkConn.Close()
+	log.Info("Tunnel connection established to: [%v]", linkAddr)
+	buffer := make([]byte, internal.MaxSignalBuffer)
+	for {
+		n, err := linkConn.Read(buffer)
+		if err != nil {
+			log.Error("Unable to read form link address: [%v] %v", linkAddr, err)
+			break
+		}
+		if string(buffer[:n]) == "[PASSPORT]<TCP>\n" {
+			go ClientTCP(linkAddr, targetTCPAddr)
+		}
+		if string(buffer[:n]) == "[PASSPORT]<UDP>\n" {
+			go ClientUDP(linkAddr, targetUDPAddr)
+		}
 	}
-	targetConn.SetNoDelay(true)
-	log.Info("Target connection established, starting data exchange: [%v] <-> [%v]", linkAddr, targetAddr)
-	util.HandleConn(linkConn, targetConn)
-	log.Info("Connection closed successfully")
 	return nil
 }
