@@ -6,7 +6,6 @@
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
 
-> [!NOTE]
 > This project is in its optimizing stage, while dev-versions may be pre-released. Please avoid using pre-release binary files or container images with 'latest' tag. Choose the release version displayed on the badge shown above for stable usage.
 
 <div align="center">
@@ -44,7 +43,7 @@
   <img src="https://cdn.185610.xyz/assets/forward.png" alt="forward">
 </div>
 
-## Usage
+## Basic Usage
 
 You can easily learn how to use it correctly by running passport directly without parameters.
 
