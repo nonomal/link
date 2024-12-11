@@ -36,12 +36,14 @@
 <div align="center">
   <img src="https://cdn.185610.xyz/assets/tunnel.png" alt="tunnel">
 </div>
+Tunneling establishes seamless access to otherwise unreachable resources. A user’s request is sent to the server, which forwards it through a pre-established TLS-encrypted channel to the client. The client then connects to the target service, creating two secure links: one to the server and another to the target. This enables data exchange between the client and the target, and subsequently between the server and the user. For concurrent user requests, multiple TLS-encrypted connections are established, supporting native high-concurrency performance. Notably, UDP tunneling leverages the same TLS-encrypted TCP channels between the server and client, ensuring security and eliminating latency caused by unsuccessful NAT traversal attempts.
 
 ### Port Forwarding
 
 <div align="center">
   <img src="https://cdn.185610.xyz/assets/forward.png" alt="forward">
 </div>
+Forwarding simplifies the process by directly relaying user TCP/UDP requests to the target service via a broker. The broker establishes a connection with the target, exchanges data with the service, and returns responses to the user. While this mode supports high concurrency if the user-side supports multithreading, it does not employ TLS encryption. For secure usage, ensure the target service provides its own transmission security.
 
 ## Basic Usage
 
