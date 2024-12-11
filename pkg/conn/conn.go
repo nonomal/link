@@ -19,6 +19,4 @@ func DataExchange(conn1, conn2 net.Conn) {
 	}()
 	<-done
 	<-done
-	closeConn(conn1)
-	closeConn(conn2)
 }
