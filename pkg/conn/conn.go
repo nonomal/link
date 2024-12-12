@@ -28,7 +28,11 @@ func DataExchange(conn1, conn2 net.Conn) error {
 	errChan := make(chan error, 2)
 	wg.Add(2)
 	go func() {
-		defer wg.Done()
+		defer func() {
+			wg.Done()
+			closeConn1()
+			closeConn2()
+		}()
 		if _, err := io.Copy(conn1, conn2); err != nil {
 			closeConn1()
 			closeConn2()
@@ -36,7 +40,11 @@ func DataExchange(conn1, conn2 net.Conn) error {
 		}
 	}()
 	go func() {
-		defer wg.Done()
+		defer func() {
+			wg.Done()
+			closeConn1()
+			closeConn2()
+		}()
 		if _, err := io.Copy(conn2, conn1); err != nil {
 			closeConn1()
 			closeConn2()
@@ -44,8 +52,6 @@ func DataExchange(conn1, conn2 net.Conn) error {
 		}
 	}()
 	wg.Wait()
-	closeConn1()
-	closeConn2()
 	select {
 	case err := <-errChan:
 		return err
