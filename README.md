@@ -45,6 +45,13 @@ Tunneling establishes seamless access to otherwise unreachable resources. A user
 </div>
 Forwarding simplifies the process by directly relaying user TCP/UDP requests to the target service via a broker. The broker establishes a connection with the target, exchanges data with the service, and returns responses to the user. While this mode supports high concurrency if the user-side supports multithreading, it does not employ TLS encryption. For secure usage, ensure the target service provides its own transmission security.
 
+### Access Control
+
+<div align="center">
+  <img src="https://cdn.185610.xyz/assets/access.png" alt="access">
+</div>
+The authentication system employs a secure and dynamic IP whitelisting mechanism designed to manage access control effectively. Verified IP addresses are stored in memory for the duration of the server or broker's runtime, with all entries cleared upon server restart to ensure that no stale or unauthorized IPs remain active. This design prioritizes security by requiring reauthentication after a restart. When a user attempts to access a resource, their IP is checked against the whitelist. If the IP is present, access is granted seamlessly. If the user's IP has changed, or if the IP is not whitelisted, the system blocks access and redirects the user to an authentication URL. Successful authentication not only verifies the user's access but also updates the whitelist by temporarily storing the IP in memory and returning the current IP address to confirm the process. Unauthorized IPs remain blocked until proper authentication is completed. This approach combines real-time validation, adaptability to changing IPs, and enhanced security measures to provide a reliable access control solution.
+
 ## Basic Usage
 
 You can easily learn how to use it correctly by running passport directly without parameters.
