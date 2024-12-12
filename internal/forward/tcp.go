@@ -64,9 +64,8 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			log.Info("Target connection established: [%v]", targetAddr)
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			if err := conn.DataExchange(linkConn, targetConn); err != nil {
-				log.Error("Unable to exchange data: %v", err)
+				log.Info("Connection closed successfully: %v", err)
 			}
-			log.Info("Connection closed successfully")
 		}(linkConn)
 	}
 }

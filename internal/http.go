@@ -26,7 +26,7 @@ func HandleHTTP(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) 
 	})
 	if parsedURL.Scheme == "http" {
 		if err := http.ListenAndServe(parsedURL.Host, nil); err != nil {
-			log.Error("Error serving HTTP: %v", err)
+			log.Error("Unable to serve HTTP: %v", err)
 			return err
 		}
 	} else {
@@ -36,7 +36,7 @@ func HandleHTTP(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) 
 			ErrorLog:  log.NewLogger(),
 		}
 		if err := authServer.ListenAndServeTLS("", ""); err != nil {
-			log.Error("Error serving HTTPS: %v", err)
+			log.Error("Unable to serve HTTPS: %v", err)
 			return err
 		}
 	}

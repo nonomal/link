@@ -22,11 +22,11 @@ func main() {
 	rawURL := os.Args[1]
 	parsedURL, err := url.Parse(rawURL)
 	if err != nil {
-		log.Fatal("Error parsing raw URL: %v", err)
+		log.Fatal("Unable to parse raw URL: %v", err)
 	}
 	tlsConfig, err := tls.NewTLSconfig("yosebyte/passport:" + version)
 	if err != nil {
-		log.Error("Error generating TLS config: %v", err)
+		log.Error("Unable to generate TLS config: %v", err)
 	}
 	authSetups(parsedURL, &whiteList, tlsConfig)
 	coreSelect(parsedURL, rawURL, &whiteList, tlsConfig)

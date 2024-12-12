@@ -63,9 +63,8 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			defer remoteConn.Close()
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			if err := conn.DataExchange(remoteConn, targetConn); err != nil {
-				log.Error("Unable to exchange data: %v", err)
+				log.Info("Connection closed successfully: %v", err)
 			}
-			log.Info("Connection closed successfully")
 		}(targetConn)
 	}
 	return nil
@@ -85,7 +84,6 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 	}
 	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
 	if err := conn.DataExchange(remoteConn, targetConn); err != nil {
-		log.Error("Unable to exchange data: %v", err)
+		log.Info("Connection closed successfully: %v", err)
 	}
-	log.Info("Connection closed successfully")
 }

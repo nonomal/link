@@ -16,7 +16,7 @@ func authSetups(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) 
 	}
 	parsedAuthURL, err := url.Parse(parsedURL.Fragment)
 	if err != nil {
-		log.Fatal("Error parsing auth URL: %v", err)
+		log.Fatal("Unable to parse auth URL: %v", err)
 	}
 	log.Info("Auth mode enabled: %v", parsedAuthURL)
 	go func() {
