@@ -7,7 +7,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/yosebyte/passport/internal/util"
+	"github.com/yosebyte/passport/internal"
+	"github.com/yosebyte/passport/pkg/conn"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -28,7 +29,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 		return err
 	}
 	defer linkListen.Close()
-	tempSlot := make(chan struct{}, 1024)
+	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
@@ -36,10 +37,9 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			time.Sleep(1 * time.Second)
 			continue
 		}
-		linkConn.SetNoDelay(true)
-		tempSlot <- struct{}{}
-		go func(linkConn net.Conn) {
-			defer func() { <-tempSlot }()
+		sem <- struct{}{}
+		go func(linkConn *net.TCPConn) {
+			defer func() { <-sem }()
 			clientAddr := linkConn.RemoteAddr().String()
 			log.Info("Client connection established: [%v]", clientAddr)
 			if parsedURL.Fragment != "" {
@@ -61,11 +61,11 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 				linkConn.Close()
 				return
 			}
-			targetConn.SetNoDelay(true)
 			log.Info("Target connection established: [%v]", targetAddr)
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
-			util.HandleConn(linkConn, targetConn)
-			log.Info("Connection closed successfully")
+			if err := conn.DataExchange(linkConn, targetConn); err != nil {
+				log.Info("Connection closed successfully: %v", err)
+			}
 		}(linkConn)
 	}
 }

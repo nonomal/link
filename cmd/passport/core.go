@@ -1,7 +1,9 @@
 package main
 
 import (
+	"crypto/tls"
 	"net/url"
+	"os"
 	"strings"
 	"sync"
 	"time"
@@ -11,23 +13,24 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
+func coreSelect(parsedURL *url.URL, rawURL string, whiteList *sync.Map, tlsConfig *tls.Config) {
 	switch parsedURL.Scheme {
 	case "server":
-		runServer(parsedURL, rawURL, whiteList)
+		runServer(parsedURL, rawURL, whiteList, tlsConfig)
 	case "client":
 		runClient(parsedURL, rawURL)
 	case "broker":
 		runBroker(parsedURL, rawURL, whiteList)
 	default:
-		log.Fatal("Invalid core scheme: run ./passport for more details")
+		helpInfo()
+		os.Exit(1)
 	}
 }
 
-func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Info("Server mode enabled: %v", strings.Split(rawURL, "#")[0])
+func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map, tlsConfig *tls.Config) {
+	log.Info("Server core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
-		if err := tunnel.Server(parsedURL, whiteList); err != nil {
+		if err := tunnel.Server(parsedURL, whiteList, tlsConfig); err != nil {
 			log.Error("Server core error: %v", err)
 			log.Info("Restarting in 1s...")
 			time.Sleep(1 * time.Second)
@@ -36,7 +39,7 @@ func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 }
 
 func runClient(parsedURL *url.URL, rawURL string) {
-	log.Info("Client mode enabled: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Client core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
 		if err := tunnel.Client(parsedURL); err != nil {
 			log.Error("Client core error: %v", err)
@@ -47,7 +50,7 @@ func runClient(parsedURL *url.URL, rawURL string) {
 }
 
 func runBroker(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
-	log.Info("Broker mode enabled: %v", strings.Split(rawURL, "#")[0])
+	log.Info("Broker core selected: %v", strings.Split(rawURL, "#")[0])
 	for {
 		if err := forward.Broker(parsedURL, whiteList); err != nil {
 			log.Error("Broker core error: %v", err)
