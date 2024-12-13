@@ -3,6 +3,7 @@ package conn
 import (
 	"io"
 	"net"
+	"strings"
 	"sync"
 )
 
@@ -50,7 +51,11 @@ func DataExchange(conn1, conn2 net.Conn) error {
 	wg.Wait()
 	select {
 	case err := <-errChan:
-		return err
+		if strings.Contains(err.Error(), "use of closed network connection") {
+			return io.EOF
+		} else {
+			return err
+		}
 	default:
 		return io.EOF
 	}
