@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/url"
 	"strings"
-	"time"
 
 	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/log"
@@ -39,8 +38,7 @@ func Client(parsedURL *url.URL) error {
 		n, err := linkConn.Read(buffer)
 		if err != nil {
 			log.Error("Unable to read form link address: [%v] %v", linkAddr, err)
-			time.Sleep(1 * time.Second)
-			continue
+			break
 		}
 		if string(buffer[:n]) == "[PASSPORT]<TCP>\n" {
 			go ClientTCP(linkAddr, targetTCPAddr)
@@ -49,4 +47,5 @@ func Client(parsedURL *url.URL) error {
 			go ClientUDP(linkAddr, targetUDPAddr)
 		}
 	}
+	return err
 }
