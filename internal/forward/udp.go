@@ -34,6 +34,7 @@ func HandleUDP(parsedURL *url.URL, whiteList *sync.Map) error {
 		n, clientAddr, err := linkConn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		if parsedURL.Fragment != "" {

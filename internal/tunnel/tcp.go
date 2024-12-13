@@ -6,6 +6,7 @@ import (
 	"net"
 	"net/url"
 	"sync"
+	"time"
 
 	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/conn"
@@ -25,7 +26,8 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 		targetConn, err := targetListen.AcceptTCP()
 		if err != nil {
 			log.Error("Unable to accept connections form target address: [%v] %v", targetAddr, err)
-			break
+			time.Sleep(1 * time.Second)
+			continue
 		}
 		clientAddr := targetConn.RemoteAddr().String()
 		log.Info("Target connection established from: [%v]", clientAddr)
@@ -34,6 +36,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			if err != nil {
 				log.Error("Unable to extract client IP address: [%v] %v", clientAddr, err)
 				targetConn.Close()
+				time.Sleep(1 * time.Second)
 				continue
 			}
 			if _, exists := whiteList.Load(clientIP); !exists {
@@ -68,7 +71,6 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			}
 		}(targetConn)
 	}
-	return nil
 }
 
 func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {

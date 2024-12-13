@@ -25,7 +25,8 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 		n, clientAddr, err := targetConn.ReadFromUDP(buffer)
 		if err != nil {
 			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
-			break
+			time.Sleep(1 * time.Second)
+			continue
 		}
 		if parsedURL.Fragment != "" {
 			clientIP := clientAddr.IP.String()
@@ -39,11 +40,13 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 		mu.Unlock()
 		if err != nil {
 			log.Error("Unable to send signal: %v", err)
-			break
+			time.Sleep(1 * time.Second)
+			continue
 		}
 		remoteConn, err := linkListen.Accept()
 		if err != nil {
 			log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
+			time.Sleep(1 * time.Second)
 			continue
 		}
 		sem <- struct{}{}
@@ -71,7 +74,6 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			log.Info("Transfer completed successfully")
 		}(buffer, n, remoteConn, clientAddr)
 	}
-	return nil
 }
 
 func ClientUDP(linkAddr *net.TCPAddr, targetUDPAddr *net.UDPAddr) {

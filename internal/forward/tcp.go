@@ -34,7 +34,7 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 	for {
 		linkConn, err := linkListen.AcceptTCP()
 		if err != nil {
-			log.Error("Unable to connect link address: [%v] %v", linkAddr, err)
+			log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
 			time.Sleep(1 * time.Second)
 			continue
 		}
