@@ -66,7 +66,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				if err == io.EOF {
 					log.Info("Connection closed successfully: %v", err)
 				} else {
-					log.Info("Connection closed by peer: %v", err)
+					log.Warn("Connection closed unexpectedly: %v", err)
 				}
 			}
 		}(targetConn)
@@ -90,7 +90,7 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 		if err == io.EOF {
 			log.Info("Connection closed successfully: %v", err)
 		} else {
-			log.Info("Connection closed by peer: %v", err)
+			log.Warn("Connection closed unexpectedly: %v", err)
 		}
 	}
 }
