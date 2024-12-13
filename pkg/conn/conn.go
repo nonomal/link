@@ -49,14 +49,9 @@ func DataExchange(conn1, conn2 net.Conn) error {
 		}
 	}()
 	wg.Wait()
-	select {
-	case err := <-errChan:
-		if strings.Contains(err.Error(), "use of closed network connection") {
-			return io.EOF
-		} else {
-			return err
-		}
-	default:
+	err := <-errChan
+	if strings.Contains(err.Error(), "use of closed network connection") || err == nil {
 		return io.EOF
 	}
+	return err
 }
