@@ -56,6 +56,6 @@ func DataExchange(conn1, conn2 net.Conn) error {
 	case err := <-errChan:
 		return err
 	default:
-		return nil
+		return io.EOF
 	}
 }

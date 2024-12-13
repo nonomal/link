@@ -1,6 +1,7 @@
 package forward
 
 import (
+	"io"
 	"net"
 	"net/url"
 	"strings"
@@ -64,7 +65,11 @@ func HandleTCP(parsedURL *url.URL, whiteList *sync.Map) error {
 			log.Info("Target connection established: [%v]", targetAddr)
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			if err := conn.DataExchange(linkConn, targetConn); err != nil {
-				log.Info("Connection closed successfully: %v", err)
+				if err == io.EOF {
+					log.Info("Connection closed successfully: %v", err)
+				} else {
+					log.Info("Connection closed by peer: %v", err)
+				}
 			}
 		}(linkConn)
 	}

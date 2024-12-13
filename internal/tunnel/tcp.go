@@ -2,6 +2,7 @@ package tunnel
 
 import (
 	"crypto/tls"
+	"io"
 	"net"
 	"net/url"
 	"sync"
@@ -43,10 +44,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 		}
 		sem <- struct{}{}
 		go func(targetConn *net.TCPConn) {
-			defer func() {
-				<-sem
-				targetConn.Close()
-			}()
+			defer func() { <-sem }()
 			mu.Lock()
 			_, err = linkConn.Write([]byte("[PASSPORT]<TCP>\n"))
 			mu.Unlock()
@@ -60,10 +58,13 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
 				return
 			}
-			defer remoteConn.Close()
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
 			if err := conn.DataExchange(remoteConn, targetConn); err != nil {
-				log.Info("Connection closed successfully: %v", err)
+				if err == io.EOF {
+					log.Info("Connection closed successfully: %v", err)
+				} else {
+					log.Info("Connection closed by peer: %v", err)
+				}
 			}
 		}(targetConn)
 	}
@@ -84,6 +85,10 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 	}
 	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
 	if err := conn.DataExchange(remoteConn, targetConn); err != nil {
-		log.Info("Connection closed successfully: %v", err)
+		if err == io.EOF {
+			log.Info("Connection closed successfully: %v", err)
+		} else {
+			log.Info("Connection closed by peer: %v", err)
+		}
 	}
 }
