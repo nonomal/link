@@ -29,25 +29,21 @@ func DataExchange(conn1, conn2 net.Conn) error {
 	wg.Add(2)
 	go func() {
 		defer func() {
-			wg.Done()
 			closeConn1()
 			closeConn2()
+			wg.Done()
 		}()
 		if _, err := io.Copy(conn1, conn2); err != nil {
-			closeConn1()
-			closeConn2()
 			errChan <- err
 		}
 	}()
 	go func() {
 		defer func() {
-			wg.Done()
-			closeConn1()
 			closeConn2()
+			closeConn1()
+			wg.Done()
 		}()
 		if _, err := io.Copy(conn2, conn1); err != nil {
-			closeConn1()
-			closeConn2()
 			errChan <- err
 		}
 	}()
