@@ -32,6 +32,9 @@ func Client(parsedURL *url.URL) error {
 		return err
 	}
 	defer linkConn.Close()
+	if err := linkConn.Handshake(); err != nil {
+		return err
+	}
 	log.Info("Tunnel connection established to: [%v]", linkAddr)
 	buffer := make([]byte, internal.MaxSignalBuffer)
 	for {

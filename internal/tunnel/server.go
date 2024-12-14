@@ -38,13 +38,21 @@ func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) erro
 		return err
 	}
 	defer linkConn.Close()
+	linkTLS, ok := linkConn.(*tls.Conn)
+	if !ok {
+		log.Error("Non-TLS connection received")
+		return nil
+	}
+	if err := linkTLS.Handshake(); err != nil {
+		return err
+	}
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
 	errChan := make(chan error, 2)
 	go func() {
-		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkConn)
+		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkTLS)
 	}()
 	go func() {
-		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkConn)
+		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkTLS)
 	}()
 	return <-errChan
 }

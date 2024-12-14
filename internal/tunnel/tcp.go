@@ -13,7 +13,7 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen net.Listener, linkConn net.Conn) error {
+func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen net.Listener, linkTLS net.Conn) error {
 	targetListen, err := net.ListenTCP("tcp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
@@ -49,7 +49,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 		go func(targetConn *net.TCPConn) {
 			defer func() { <-sem }()
 			mu.Lock()
-			_, err = linkConn.Write([]byte("[PASSPORT]<TCP>\n"))
+			_, err = linkTLS.Write([]byte("[PASSPORT]<TCP>\n"))
 			mu.Unlock()
 			if err != nil {
 				log.Error("Unable to send signal: %v", err)
@@ -61,8 +61,17 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
 				return
 			}
+			remoteTLS, ok := remoteConn.(*tls.Conn)
+			if !ok {
+				log.Error("Non-TLS connection received")
+				return
+			}
+			if err := remoteTLS.Handshake(); err != nil {
+				log.Error("TLS handshake failed: %v", err)
+				return
+			}
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
-			if err := conn.DataExchange(remoteConn, targetConn); err != nil {
+			if err := conn.DataExchange(remoteTLS, targetConn); err != nil {
 				if err == io.EOF {
 					log.Info("Connection closed successfully: %v", err)
 				} else {
@@ -80,13 +89,17 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 		return
 	}
 	log.Info("Target connection established: [%v]", targetTCPAddr)
-	remoteConn, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
+	remoteTLS, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
 		return
 	}
+	if err := remoteTLS.Handshake(); err != nil {
+		log.Error("TLS handshake failed: %v", err)
+		return
+	}
 	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)
-	if err := conn.DataExchange(remoteConn, targetConn); err != nil {
+	if err := conn.DataExchange(remoteTLS, targetConn); err != nil {
 		if err == io.EOF {
 			log.Info("Connection closed successfully: %v", err)
 		} else {
