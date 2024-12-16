@@ -55,20 +55,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) erro
 	errChan := make(chan error, 2)
 	done := make(chan struct{})
 	go func() {
-		for {
-			time.Sleep(internal.MaxReportInterval * time.Second)
-			sharedMU.Lock()
-			_, err = linkTLS.Write([]byte("[REPORT]\n"))
-			sharedMU.Unlock()
-			if err != nil {
-				log.Error("Tunnel connection health check failed: %v", err)
-				linkTLS.Close()
-				linkListen.Close()
-				close(done)
-				errChan <- err
-				break
-			}
-		}
+		errChan <- healthCheck(linkListen, linkTLS, &sharedMU, done)
 	}()
 	go func() {
 		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkTLS, &sharedMU, done)
@@ -77,4 +64,20 @@ func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) erro
 		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkTLS, &sharedMU, done)
 	}()
 	return <-errChan
+}
+
+func healthCheck(linkListen net.Listener, linkTLS *tls.Conn, sharedMU *sync.Mutex, done chan struct{}) error {
+	for {
+		time.Sleep(internal.MaxReportInterval * time.Second)
+		sharedMU.Lock()
+		_, err := linkTLS.Write([]byte("[REPORT]\n"))
+		sharedMU.Unlock()
+		if err != nil {
+			log.Error("Tunnel connection health check failed: %v", err)
+			linkTLS.Close()
+			linkListen.Close()
+			close(done)
+			return err
+		}
+	}
 }
