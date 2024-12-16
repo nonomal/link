@@ -6,7 +6,9 @@ import (
 	"net/url"
 	"strings"
 	"sync"
+	"time"
 
+	"github.com/yosebyte/passport/internal"
 	"github.com/yosebyte/passport/pkg/log"
 )
 
@@ -41,18 +43,35 @@ func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) erro
 	linkTLS, ok := linkConn.(*tls.Conn)
 	if !ok {
 		log.Error("Non-TLS connection received")
+		linkConn.Close()
 		return nil
 	}
 	if err := linkTLS.Handshake(); err != nil {
+		linkConn.Close()
 		return err
 	}
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
+	var sharedMU sync.Mutex
 	errChan := make(chan error, 2)
 	go func() {
-		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkTLS)
+		for {
+			time.Sleep(internal.MaxReportInterval * time.Second)
+			sharedMU.Lock()
+			_, err = linkTLS.Write([]byte("[REPORT]\n"))
+			sharedMU.Unlock()
+			if err != nil {
+				log.Error("TLS connection health check failed: %v", err)
+				linkTLS.Close()
+				errChan <- err
+				return
+			}
+		}
 	}()
 	go func() {
-		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkTLS)
+		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkTLS, &sharedMU)
+	}()
+	go func() {
+		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkTLS, &sharedMU)
 	}()
 	return <-errChan
 }

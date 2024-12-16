@@ -13,14 +13,13 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen net.Listener, linkTLS net.Conn) error {
+func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex) error {
 	targetListen, err := net.ListenTCP("tcp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetListen.Close()
-	var mu sync.Mutex
 	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		targetConn, err := targetListen.AcceptTCP()
@@ -64,10 +63,14 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 			remoteTLS, ok := remoteConn.(*tls.Conn)
 			if !ok {
 				log.Error("Non-TLS connection received")
+				targetConn.Close()
+				remoteConn.Close()
 				return
 			}
 			if err := remoteTLS.Handshake(); err != nil {
 				log.Error("TLS handshake failed: %v", err)
+				targetConn.Close()
+				remoteTLS.Close()
 				return
 			}
 			log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
@@ -92,10 +95,13 @@ func ClientTCP(linkAddr, targetTCPAddr *net.TCPAddr) {
 	remoteTLS, err := tls.Dial("tcp", linkAddr.String(), &tls.Config{InsecureSkipVerify: true})
 	if err != nil {
 		log.Error("Unable to dial target address: [%v], %v", linkAddr, err)
+		targetConn.Close()
 		return
 	}
 	if err := remoteTLS.Handshake(); err != nil {
 		log.Error("TLS handshake failed: %v", err)
+		targetConn.Close()
+		remoteTLS.Close()
 		return
 	}
 	log.Info("Starting data exchange: [%v] <-> [%v]", linkAddr, targetTCPAddr)

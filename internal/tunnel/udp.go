@@ -11,14 +11,13 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen net.Listener, linkTLS net.Conn) error {
+func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex) error {
 	targetConn, err := net.ListenUDP("udp", targetAddr)
 	if err != nil {
 		log.Error("Unable to listen target address: [%v]", targetAddr)
 		return err
 	}
 	defer targetConn.Close()
-	var mu sync.Mutex
 	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		buffer := make([]byte, internal.MaxDataBuffer)
@@ -52,11 +51,13 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 		remoteTLS, ok := remoteConn.(*tls.Conn)
 		if !ok {
 			log.Error("Non-TLS connection received")
+			remoteConn.Close()
 			time.Sleep(1 * time.Second)
 			continue
 		}
 		if err := remoteTLS.Handshake(); err != nil {
 			log.Error("TLS handshake failed: %v", err)
+			remoteTLS.Close()
 			time.Sleep(1 * time.Second)
 			continue
 		}
