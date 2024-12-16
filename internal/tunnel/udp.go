@@ -11,80 +11,88 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex) error {
-	targetConn, err := net.ListenUDP("udp", targetAddr)
-	if err != nil {
-		log.Error("Unable to listen target address: [%v]", targetAddr)
-		return err
-	}
-	defer targetConn.Close()
-	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
+func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex, done <-chan struct{}) error {
 	for {
-		buffer := make([]byte, internal.MaxDataBuffer)
-		n, clientAddr, err := targetConn.ReadFromUDP(buffer)
-		if err != nil {
-			log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		if parsedURL.Fragment != "" {
-			clientIP := clientAddr.IP.String()
-			if _, exists := whiteList.Load(clientIP); !exists {
-				log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
-				continue
-			}
-		}
-		mu.Lock()
-		_, err = linkTLS.Write([]byte("[PASSPORT]<UDP>\n"))
-		mu.Unlock()
-		if err != nil {
-			log.Error("Unable to send signal: %v", err)
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		remoteConn, err := linkListen.Accept()
-		if err != nil {
-			log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		remoteTLS, ok := remoteConn.(*tls.Conn)
-		if !ok {
-			log.Error("Non-TLS connection received")
-			remoteConn.Close()
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		if err := remoteTLS.Handshake(); err != nil {
-			log.Error("TLS handshake failed: %v", err)
-			remoteTLS.Close()
-			time.Sleep(1 * time.Second)
-			continue
-		}
-		sem <- struct{}{}
-		go func(buffer []byte, n int, remoteTLS *tls.Conn, clientAddr *net.UDPAddr) {
-			defer func() {
-				<-sem
-				remoteTLS.Close()
-			}()
-			log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
-			_, err = remoteTLS.Write(buffer[:n])
+		select {
+		case <-done:
+			log.Warn("UDP server received shutdown signal")
+			return nil
+		default:
+			targetConn, err := net.ListenUDP("udp", targetAddr)
 			if err != nil {
-				log.Error("Unable to write to link address: [%v] %v", linkAddr, err)
-				return
+				log.Error("Unable to listen target address: [%v]", targetAddr)
+				return err
 			}
-			n, err = remoteTLS.Read(buffer)
-			if err != nil {
-				log.Error("Unable to read from link address: [%v] %v", linkAddr, err)
-				return
+			defer targetConn.Close()
+			sem := make(chan struct{}, internal.MaxSemaphoreLimit)
+			for {
+				buffer := make([]byte, internal.MaxDataBuffer)
+				n, clientAddr, err := targetConn.ReadFromUDP(buffer)
+				if err != nil {
+					log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				if parsedURL.Fragment != "" {
+					clientIP := clientAddr.IP.String()
+					if _, exists := whiteList.Load(clientIP); !exists {
+						log.Warn("Unauthorized IP address blocked: [%v]", clientIP)
+						continue
+					}
+				}
+				mu.Lock()
+				_, err = linkTLS.Write([]byte("[PASSPORT]<UDP>\n"))
+				mu.Unlock()
+				if err != nil {
+					log.Error("Unable to send signal: %v", err)
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				remoteConn, err := linkListen.Accept()
+				if err != nil {
+					log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				remoteTLS, ok := remoteConn.(*tls.Conn)
+				if !ok {
+					log.Error("Non-TLS connection received")
+					remoteConn.Close()
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				if err := remoteTLS.Handshake(); err != nil {
+					log.Error("TLS handshake failed: %v", err)
+					remoteTLS.Close()
+					time.Sleep(1 * time.Second)
+					continue
+				}
+				sem <- struct{}{}
+				go func(buffer []byte, n int, remoteTLS *tls.Conn, clientAddr *net.UDPAddr) {
+					defer func() {
+						<-sem
+						remoteTLS.Close()
+					}()
+					log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
+					_, err = remoteTLS.Write(buffer[:n])
+					if err != nil {
+						log.Error("Unable to write to link address: [%v] %v", linkAddr, err)
+						return
+					}
+					n, err = remoteTLS.Read(buffer)
+					if err != nil {
+						log.Error("Unable to read from link address: [%v] %v", linkAddr, err)
+						return
+					}
+					_, err = targetConn.WriteToUDP(buffer[:n], clientAddr)
+					if err != nil {
+						log.Error("Unable to write to client address: [%v] %v", clientAddr, err)
+						return
+					}
+					log.Info("Transfer completed successfully")
+				}(buffer, n, remoteTLS, clientAddr)
 			}
-			_, err = targetConn.WriteToUDP(buffer[:n], clientAddr)
-			if err != nil {
-				log.Error("Unable to write to client address: [%v] %v", clientAddr, err)
-				return
-			}
-			log.Info("Transfer completed successfully")
-		}(buffer, n, remoteTLS, clientAddr)
+		}
 	}
 }
 

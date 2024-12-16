@@ -53,6 +53,7 @@ func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) erro
 	log.Info("Tunnel connection established from: [%v]", linkConn.RemoteAddr().String())
 	var sharedMU sync.Mutex
 	errChan := make(chan error, 2)
+	done := make(chan struct{})
 	go func() {
 		for {
 			time.Sleep(internal.MaxReportInterval * time.Second)
@@ -60,18 +61,20 @@ func Server(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) erro
 			_, err = linkTLS.Write([]byte("[REPORT]\n"))
 			sharedMU.Unlock()
 			if err != nil {
-				log.Error("TLS connection health check failed: %v", err)
+				log.Error("Tunnel connection health check failed: %v", err)
 				linkTLS.Close()
+				linkListen.Close()
+				close(done)
 				errChan <- err
-				return
+				break
 			}
 		}
 	}()
 	go func() {
-		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkTLS, &sharedMU)
+		errChan <- ServeTCP(parsedURL, whiteList, linkAddr, targetTCPAddr, linkListen, linkTLS, &sharedMU, done)
 	}()
 	go func() {
-		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkTLS, &sharedMU)
+		errChan <- ServeUDP(parsedURL, whiteList, linkAddr, targetUDPAddr, linkListen, linkTLS, &sharedMU, done)
 	}()
 	return <-errChan
 }
