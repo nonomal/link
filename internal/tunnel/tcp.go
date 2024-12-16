@@ -25,6 +25,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 		select {
 		case <-done:
 			log.Warn("TCP server received shutdown signal")
+			targetListen.Close()
 			return nil
 		default:
 			targetConn, err := targetListen.AcceptTCP()
