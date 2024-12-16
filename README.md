@@ -3,8 +3,8 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/yosebyte/passport)](https://goreportcard.com/report/github.com/yosebyte/passport)
 [![Go Reference](https://pkg.go.dev/badge/github.com/yosebyte/passport.svg)](https://pkg.go.dev/github.com/yosebyte/passport)
 ![GitHub Release](https://img.shields.io/github/v/release/yosebyte/passport)
-![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/yosebyte/passport/docker.yml)
 ![GitHub last commit](https://img.shields.io/github/last-commit/yosebyte/passport)
+![GitHub commits since latest release](https://img.shields.io/github/commits-since/yosebyte/passport/latest)
 
 > This project is in its optimizing stage, while dev-versions may be pre-released. Please avoid using pre-release binary files or container images with 'latest' tag. Choose the release version displayed on the badge shown above for stable usage.
 
