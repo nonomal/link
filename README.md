@@ -141,27 +141,37 @@ You can also run **Passport** using docker or podman. The image is available at 
 To run the container in server mode with or without authorization:
 
 ```
-docker run -d --rm ghcr.io/yosebyte/passport server://:10101/:10022#https://hostname:8443/server
+docker run -d --rm \
+    ghcr.io/yosebyte/passport \
+    server://:10101/:10022#https://hostname:8443/server
 ```
 
 ```
-docker run -d --rm ghcr.io/yosebyte/passport server://:10101/:10022
+docker run -d --rm \
+    ghcr.io/yosebyte/passport \
+    server://:10101/:10022
 ```
 
 To run the container in client mode:
 
 ```
-docker run -d --rm ghcr.io/yosebyte/passport client://server_hostname_or_IP:10101/127.0.0.1:22
+docker run -d --rm \
+    ghcr.io/yosebyte/passport \
+    client://server_hostname_or_IP:10101/127.0.0.1:22
 ```
 
 To run the container in server mode with or without authorization:
 
 ```
-docker run -d --rm ghcr.io/yosebyte/passport broker://:10101/127.0.0.1:22#https://hostname:8443/broker
+docker run -d --rm \
+    ghcr.io/yosebyte/passport \
+    broker://:10101/127.0.0.1:22#https://hostname:8443/broker
 ```
 
 ```
-docker run -d --rm ghcr.io/yosebyte/passport broker://:10101/127.0.0.1:22
+docker run -d --rm \
+    ghcr.io/yosebyte/passport \
+    broker://:10101/127.0.0.1:22
 ```
 
 ## License
