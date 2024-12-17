@@ -13,24 +13,17 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net.TCPAddr, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex, done <-chan struct{}) error {
-	targetListen, err := net.ListenTCP("tcp", targetAddr)
-	if err != nil {
-		log.Error("Unable to listen target address: [%v]", targetAddr)
-		return err
-	}
-	defer targetListen.Close()
+func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, targetTCPListen *net.TCPListener, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex, done <-chan struct{}) error {
 	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		select {
 		case <-done:
 			log.Warn("TCP server received shutdown signal")
-			targetListen.Close()
 			return nil
 		default:
-			targetConn, err := targetListen.AcceptTCP()
+			targetConn, err := targetTCPListen.AcceptTCP()
 			if err != nil {
-				log.Error("Unable to accept connections form target address: [%v] %v", targetAddr, err)
+				log.Error("Unable to accept connections form target address: [%v] %v", targetTCPListen.Addr().String(), err)
 				time.Sleep(1 * time.Second)
 				continue
 			}
@@ -63,7 +56,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 				}
 				remoteConn, err := linkListen.Accept()
 				if err != nil {
-					log.Error("Unable to accept connections form link address: [%v] %v", linkAddr, err)
+					log.Error("Unable to accept connections form link address: [%v] %v", linkListen.Addr().String(), err)
 					return
 				}
 				remoteTLS, ok := remoteConn.(*tls.Conn)
@@ -79,7 +72,7 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, linkAddr, targetAddr *net
 					remoteTLS.Close()
 					return
 				}
-				log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetAddr)
+				log.Info("Starting data exchange: [%v] <-> [%v]", clientAddr, targetTCPListen.Addr().String())
 				if err := conn.DataExchange(remoteTLS, targetConn); err != nil {
 					if err == io.EOF {
 						log.Info("Connection closed successfully: %v", err)

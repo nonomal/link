@@ -11,23 +11,16 @@ import (
 	"github.com/yosebyte/passport/pkg/log"
 )
 
-func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, targetAddr *net.UDPAddr, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex, done <-chan struct{}) error {
-	targetConn, err := net.ListenUDP("udp", targetAddr)
-	if err != nil {
-		log.Error("Unable to listen target address: [%v]", targetAddr)
-		return err
-	}
-	defer targetConn.Close()
+func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, targetUDPConn *net.UDPConn, linkListen net.Listener, linkTLS *tls.Conn, mu *sync.Mutex, done <-chan struct{}) error {
 	sem := make(chan struct{}, internal.MaxSemaphoreLimit)
 	for {
 		select {
 		case <-done:
 			log.Warn("UDP server received shutdown signal")
-			targetConn.Close()
 			return nil
 		default:
 			buffer := make([]byte, internal.MaxDataBuffer)
-			n, clientAddr, err := targetConn.ReadFromUDP(buffer)
+			n, clientAddr, err := targetUDPConn.ReadFromUDP(buffer)
 			if err != nil {
 				log.Error("Unable to read from client address: [%v] %v", clientAddr, err)
 				time.Sleep(1 * time.Second)
@@ -50,7 +43,7 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 			}
 			remoteConn, err := linkListen.Accept()
 			if err != nil {
-				log.Error("Unable to accept connections from link address: [%v] %v", linkAddr, err)
+				log.Error("Unable to accept connections from link address: [%v] %v", linkListen.Addr().String(), err)
 				time.Sleep(1 * time.Second)
 				continue
 			}
@@ -73,18 +66,18 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, linkAddr *net.TCPAddr, ta
 					<-sem
 					remoteTLS.Close()
 				}()
-				log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetAddr)
+				log.Info("Starting data transfer: [%v] <-> [%v]", clientAddr, targetUDPConn.LocalAddr())
 				_, err = remoteTLS.Write(buffer[:n])
 				if err != nil {
-					log.Error("Unable to write to link address: [%v] %v", linkAddr, err)
+					log.Error("Unable to write to link address: [%v] %v", linkListen.Addr().String(), err)
 					return
 				}
 				n, err = remoteTLS.Read(buffer)
 				if err != nil {
-					log.Error("Unable to read from link address: [%v] %v", linkAddr, err)
+					log.Error("Unable to read from link address: [%v] %v", linkListen.Addr().String(), err)
 					return
 				}
-				_, err = targetConn.WriteToUDP(buffer[:n], clientAddr)
+				_, err = targetUDPConn.WriteToUDP(buffer[:n], clientAddr)
 				if err != nil {
 					log.Error("Unable to write to client address: [%v] %v", clientAddr, err)
 					return
