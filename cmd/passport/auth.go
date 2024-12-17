@@ -23,8 +23,8 @@ func authSetups(parsedURL *url.URL, whiteList *sync.Map, tlsConfig *tls.Config) 
 		for {
 			if err := internal.HandleHTTP(parsedAuthURL, whiteList, tlsConfig); err != nil {
 				log.Error("Auth mode error: %v", err)
-				log.Info("Restarting in 1s...")
 				time.Sleep(1 * time.Second)
+				log.Info("Auth mode restarted")
 				continue
 			}
 		}

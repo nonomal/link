@@ -18,7 +18,6 @@ func ServeTCP(parsedURL *url.URL, whiteList *sync.Map, targetTCPListen *net.TCPL
 	for {
 		select {
 		case <-done:
-			log.Warn("TCP server received shutdown signal")
 			return nil
 		default:
 			targetConn, err := targetTCPListen.AcceptTCP()

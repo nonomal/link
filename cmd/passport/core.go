@@ -32,8 +32,8 @@ func runServer(parsedURL *url.URL, rawURL string, whiteList *sync.Map, tlsConfig
 	for {
 		if err := tunnel.Server(parsedURL, whiteList, tlsConfig); err != nil {
 			log.Error("Server core error: %v", err)
-			log.Info("Restarting in 1s...")
 			time.Sleep(1 * time.Second)
+			log.Info("Server core restarted")
 		}
 	}
 }
@@ -43,8 +43,8 @@ func runClient(parsedURL *url.URL, rawURL string) {
 	for {
 		if err := tunnel.Client(parsedURL); err != nil {
 			log.Error("Client core error: %v", err)
-			log.Info("Restarting in 1s...")
 			time.Sleep(1 * time.Second)
+			log.Info("Client core restarted")
 		}
 	}
 }
@@ -54,8 +54,8 @@ func runBroker(parsedURL *url.URL, rawURL string, whiteList *sync.Map) {
 	for {
 		if err := forward.Broker(parsedURL, whiteList); err != nil {
 			log.Error("Broker core error: %v", err)
-			log.Info("Restarting in 1s...")
 			time.Sleep(1 * time.Second)
+			log.Info("Broker core restarted")
 		}
 	}
 }

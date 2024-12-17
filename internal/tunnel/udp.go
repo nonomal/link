@@ -16,7 +16,6 @@ func ServeUDP(parsedURL *url.URL, whiteList *sync.Map, targetUDPConn *net.UDPCon
 	for {
 		select {
 		case <-done:
-			log.Warn("UDP server received shutdown signal")
 			return nil
 		default:
 			buffer := make([]byte, internal.MaxDataBuffer)
